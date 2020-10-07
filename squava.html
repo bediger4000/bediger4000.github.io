@@ -1,0 +1,658 @@
+<html>
+<head>
+	<meta charset="UTF-8">
+	<title>The Game of Squava</title>
+<style>
+table {table-layout: fixed;}
+table td {height:20%; font-size:300%}
+table td input {height:50px; width:50px;}
+table td div {height:50px; width:50px;}
+</style>
+
+<script language="javascript">
+
+var bookOffense = false;
+var bookDefense = true;
+
+// The 5x5 array of places for 'X' or 'O' marks.
+// (0,0) in upper left, (4,4) in lower right.
+var board = new Array(5);
+for (var i = 0; i < 5; ++i) {
+	board[i] = new Array(5);
+	for (var j = 0; j < 5; ++j) {
+		board[i][j] = 0;
+	}
+}
+
+var game_over = false;
+var WIN = 10000;   // static value score for a win.
+var LOSS = -10000; // score for a loss.
+var MAXIMIZER = 1;
+var MINIMIZER = -1;
+var UNSET = 0;
+var max_depth = 6;
+var move_counter = 0;
+
+function clork(n, m) {
+	if (game_over) { return; }
+	var dv = document.getElementById("td"+n+m);
+	dv.innerHTML = 'X';
+	board[n][m] = -1;
+	color_winner(n, m);
+	++move_counter;
+	if (!game_over) {
+		mymove();
+	}
+}
+
+var bookOffenseState = 0;
+var bookDefenseState = 0;
+var cX, cY;
+var first_moves = [
+    [0, 0],
+    [0, 1],
+    [1, 0],
+    [1, 1],
+];
+
+function mymove() {
+	if (game_over) { return; }
+
+	if (bookOffense) {
+		bookOffense = bookOffender();
+	} 
+
+	if (bookDefense) {
+		bookDefense = bookDefender();
+	}
+
+	if (move_counter < 4)  { max_depth = 4; }
+	if (move_counter > 3)  { max_depth = 6; }
+	if (move_counter > 12) { max_depth = 8; }
+
+	var max = 2*LOSS;
+
+	// A collection of moves, all having
+	// the same projected value. Computer's
+	// move selected from among them later.
+	var moves = new Array(25);
+	for (var i = 0; i < 25; ++i) {
+		moves[i] = new Array(2);
+	}
+	var next = 0;
+
+	for (var j = 0; j < 5; ++j) {
+		for (var i = 0; i < 5; ++i) {
+			if (board[i][j] == UNSET) {
+				var val;
+				board[i][j] = MAXIMIZER;
+                var decisions = deltavalue(0, i, j, 0)
+                if (decisions[0]) {
+					val = decisions[1];
+				} else {
+					val = alphabeta(1, MINIMIZER, 2*LOSS, 2*WIN, i, j, decisions[1]);
+				}
+				board[i][j] = UNSET;
+
+				if (val >= max) {
+					if (val > max) {
+						max = val;
+						next = 0;
+					}
+					moves[next][0] = i;
+					moves[next][1] = j;
+					++next;
+				}
+			}
+		}
+	}
+	var r = Math.floor(Math.random()*next);
+	var p = moves[r][0];
+	var q = moves[r][1];
+	document.getElementById('td'+p+q).innerHTML = 'O';
+	board[p][q] = MAXIMIZER;
+	color_winner(p, q);
+	++move_counter;
+}
+
+function bookDefender() {
+	switch (bookOffenseState) {
+	case 0: // Response to first move
+		bookOffenseState = 1;
+		++move_counter;
+		return true;
+		break;
+	case 1: // Response to human's 2nd move
+		return false;
+		break;
+	}
+	return false;
+}
+
+function bookOffender() {
+	switch (bookOffenseState) {
+	case 0: // First move
+		var r = Math.floor(Math.random()*4);
+		cX = first_moves[r][0];
+		cY = first_moves[r][1];
+		board[cX][cY] = MAXIMIZER;
+		document.getElementById('td'+cX+cY).innerHTML = 'O';
+		color_winner(cX, cY);
+		bookOffenseState = 1;
+		++move_counter;
+		return true;
+		break;
+	case 1: // 2nd move
+		if (board[cX+3][cY+3]) {
+			// MINIMIZER played diagonal from cX,cY, try something else
+			cX += 3;
+			bookOffenseState = 3;
+		} else {
+			// Diagonal from cX,cY
+			cX += 3;
+			cY += 3;
+			bookOffenseState = 2;
+		}
+		board[cX][cY] = MAXIMIZER;
+		document.getElementById('td'+cX+cY).innerHTML = 'O';
+		color_winner(cX, cY);
+		++move_counter;
+		return true;
+		break;
+	case 2: // 3rd move, after MAXIMIZER has ends of diagonal
+		// The corner(s) we want at at <cX-3,cY> or <cX,cY-3>
+		if(board[cX-3][cY]) {
+			cY -= 3;
+		} else {
+			cX -= 3;
+		}
+		board[cX][cY] = MAXIMIZER;
+		document.getElementById('td'+cX+cY).innerHTML = 'O';
+		color_winner(cX, cY);
+		bookOffense = false;
+		bookDefense = false;
+		return false;
+		break;
+	case 3: // 3rd move, get other diagonal
+		var tmp = cX;
+		cX = cY;
+		cY = tmp;
+		if (board[cX][cY]) {
+			// the other diagonal is taken.
+			bookOffense = false;
+			bookDefense = false;
+			// Need to figure out what to do here.
+			return false;
+		} else {
+			board[cX][cY] = MAXIMIZER;
+			document.getElementById('td'+cX+cY).innerHTML = 'O';
+			color_winner(cX, cY);
+			++move_counter;
+			bookOffense = false;
+			bookDefense = false;
+			return false;
+		}
+		break;
+	}
+	return false;
+}
+
+// Returns an array, [stopRecursing bool, value int]
+function deltavalue(ply, x, y, currentvalue) {
+	var rv = 0;
+
+	var relevant_quads = indexed_winning_quads[x][y];
+
+	for (var idx in relevant_quads) {
+		var quad = relevant_quads[idx];
+		var sum = board[quad[0][0]][quad[0][1]];
+		sum += board[quad[1][0]][quad[1][1]];
+		sum += board[quad[2][0]][quad[2][1]];
+		sum += board[quad[3][0]][quad[3][1]];
+
+		if (sum == 4 || sum == -4) {
+			// Somebody got 4-in-a-row
+			rv = board[x][y] * (WIN - ply);
+			return [true, rv];
+		}
+
+		// Give a little credit for 3-out-of-winning-4
+		// Use value of sum here, rather than re-calculating later
+		if (sum == 3 || sum == -3) {
+			rv += sum * 10;
+		}
+	}
+
+	var relevant_triplets = indexed_losing_triplets[x][y];
+	for (var idx in relevant_triplets) {
+		var triplet = relevant_triplets[idx];
+		var sum = board[triplet[0][0]][triplet[0][1]];
+		sum += board[triplet[1][0]][triplet[1][1]];
+		sum += board[triplet[2][0]][triplet[2][1]];
+
+		if (sum == 3 || sum == -3) {
+			// Somebody lost, 3-in-a-row
+			rv = -sum / 3 * (WIN - ply);
+			return [true, rv];
+		}
+	}
+
+	// Nobody should occupy 2 of these
+	for (var idx in no2) {
+		var triplet = no2[idx];
+		for (var i in triplet) {
+			var pair = triplet[i];
+			if (x == pair[0] && y == pair[1]) {
+				var sum = board[triplet[0][0]][triplet[0][1]];
+				sum += board[triplet[1][0]][triplet[1][1]];
+				sum += board[triplet[2][0]][triplet[2][1]];
+				if (sum == 2 || sum == -2) {
+					rv += board[x][y] * -100;
+				}
+				break;
+			}
+		}
+	}
+
+	// Nobody should want to occupy the middle-2-of-4
+	var player = board[x][y];
+	for (var i in noMiddle2) {
+		var quad = noMiddle2[i];
+
+		if ((x == quad[1][0] && y == quad[1][1] && player == board[quad[2][0]][quad[2][1]]) ||
+			(x == quad[2][0] && y == quad[2][1] && player == board[quad[1][0]][quad[1][1]])) {
+
+			var sum = board[quad[0][0]][quad[0][1]];
+			sum += board[quad[1][0]][quad[1][1]];
+			sum += board[quad[2][0]][quad[2][1]];
+			sum += board[quad[3][0]][quad[3][1]];
+
+			if (sum == 2 || sum == -2) {
+				rv += player * -100;
+			}
+		}
+	}
+
+	rv += board[x][y] * scores[x][y];
+
+	var stop_recursing = false;
+	if (ply == max_depth) {
+		stop_recursing = true;
+		rv += currentvalue;  // stop recursing, so this is actually total value.
+	}
+
+	return [stop_recursing, rv];
+}
+
+function color_winner(x, y) {
+	if (!game_over) {
+		var we = check_winner(x, y);
+		if (we[1]) {
+			game_over = true;
+			// Find winning quad, color it green
+			var relevant_quads = indexed_winning_quads[x][y];
+			for (var idx in relevant_quads) {
+					var quad = relevant_quads[idx];
+					var sum = board[quad[0][0]][quad[0][1]];
+					sum += board[quad[1][0]][quad[1][1]];
+					sum += board[quad[2][0]][quad[2][1]];
+					sum += board[quad[3][0]][quad[3][1]];
+
+					if (sum == 4 || sum == -4) {
+						for (var j in quad) {
+							var td = document.getElementById(
+								'td'+quad[j][0]+quad[j][1]
+							);
+							td.style.backgroundColor = "#00FF00";
+						}
+						return;
+					}
+			}
+			// Find losing triplet, color it red.
+			var relevant_triplets = indexed_losing_triplets[x][y];
+			for (var idx in relevant_triplets) {
+				var triplet = relevant_triplets[idx];
+				var sum = board[triplet[0][0]][triplet[0][1]];
+				sum += board[triplet[1][0]][triplet[1][1]];
+				sum += board[triplet[2][0]][triplet[2][1]];
+
+				if (sum == 3 || sum == -3) {
+					for (var j in triplet) {
+						var td = document.getElementById(
+							'td'+triplet[j][0]+triplet[j][1]
+						);
+						td.style.backgroundColor = "red";
+					}
+					return;
+				}
+			}
+		}
+	}
+}
+
+function alphabeta(ply, player, alpha, beta, x, y, boardvalue) {
+	var value;
+	var decisions = deltavalue(ply, x, y, boardvalue)
+	if (decisions[0]) {
+		return decisions[1];
+	}
+	boardvalue += decisions[1];
+	switch (player) {
+	case 1:
+		value = 2*LOSS;
+		for (var i = 0; i < 5; ++i) {
+			for (var j = 0; j < 5; ++j) {
+				if (board[i][j] == UNSET) {
+					board[i][j] = player;
+					var n = alphabeta(ply+1, -player, alpha, beta, i, j, boardvalue);
+					board[i][j] = UNSET;
+					if (n > value) {
+						value = n;
+					}
+					if (value > alpha) {
+						alpha = value;
+					}
+					if (beta <= alpha) {
+						return value;
+					}
+				}
+			}
+		}
+	break;
+	case -1:
+		value = 2*WIN;
+		for (var i = 0; i < 5; ++i) {
+			for (var j = 0; j < 5; ++j) {
+				if (board[i][j] == UNSET) {
+					board[i][j] = player;
+					var n = alphabeta(ply+1, -player, alpha, beta, i, j, boardvalue);
+					board[i][j] = UNSET;
+					if (n < value) {
+						value = n;
+					}
+					if (value < beta) {
+						beta = value;
+					}
+					if (beta <= alpha) {
+						return value;
+					}
+				}
+			}
+		}
+	break;
+	}
+	return value;
+}
+
+// Used in static_value() - minor biases given to
+// marks in these positions.
+var scores = [
+    [3, 3, 2, 2, 3],
+    [3, 2, 1, 2, 2],
+    [2, 1, 0, 1, 2],
+    [3, 2, 1, 2, 3],
+    [3, 3, 2, 3, 3]
+];
+
+// List of (x,y) coords of 3-in-a-row cells that
+// would lose. Not used directly. Values used to
+// build indexed_losing_triplets below.
+var losing_triplets = [
+	[[0, 0], [1, 0], [2, 0]],
+	[[0, 0], [0, 1], [0, 2]],
+	[[0, 0], [1, 1], [2, 2]],
+	[[1, 0], [2, 0], [3, 0]],
+	[[1, 0], [1, 1], [1, 2]],
+	[[1, 0], [2, 1], [3, 2]],
+	[[2, 0], [3, 0], [4, 0]],
+	[[2, 0], [2, 1], [2, 2]],
+	[[2, 0], [1, 1], [0, 2]],
+	[[2, 0], [3, 1], [4, 2]],
+	[[3, 0], [3, 1], [3, 2]],
+	[[3, 0], [2, 1], [1, 2]],
+	[[4, 0], [4, 1], [4, 2]],
+	[[4, 0], [3, 1], [2, 2]],
+	[[0, 1], [1, 1], [2, 1]],
+	[[0, 1], [0, 2], [0, 3]],
+	[[0, 1], [1, 2], [2, 3]],
+	[[1, 1], [2, 1], [3, 1]],
+	[[1, 1], [1, 2], [1, 3]],
+	[[1, 1], [2, 2], [3, 3]],
+	[[2, 1], [3, 1], [4, 1]],
+	[[2, 1], [2, 2], [2, 3]],
+	[[2, 1], [1, 2], [0, 3]],
+	[[2, 1], [3, 2], [4, 3]],
+	[[3, 1], [3, 2], [3, 3]],
+	[[3, 1], [2, 2], [1, 3]],
+	[[4, 1], [4, 2], [4, 3]],
+	[[4, 1], [3, 2], [2, 3]],
+	[[0, 2], [1, 2], [2, 2]],
+	[[0, 2], [0, 3], [0, 4]],
+	[[0, 2], [1, 3], [2, 4]],
+	[[1, 2], [2, 2], [3, 2]],
+	[[1, 2], [1, 3], [1, 4]],
+	[[1, 2], [2, 3], [3, 4]],
+	[[2, 2], [3, 2], [4, 2]],
+	[[2, 2], [2, 3], [2, 4]],
+	[[2, 2], [1, 3], [0, 4]],
+	[[2, 2], [3, 3], [4, 4]],
+	[[3, 2], [3, 3], [3, 4]],
+	[[3, 2], [2, 3], [1, 4]],
+	[[4, 2], [4, 3], [4, 4]],
+	[[4, 2], [3, 3], [2, 4]],
+	[[0, 3], [1, 3], [2, 3]],
+	[[1, 3], [2, 3], [3, 3]],
+	[[2, 3], [3, 3], [4, 3]],
+	[[0, 4], [1, 4], [2, 4]],
+	[[1, 4], [2, 4], [3, 4]],
+	[[2, 4], [3, 4], [4, 4]]
+];
+
+// 4-in-a-row where you don't want to have the middle 2
+var noMiddle2 = [
+    [[3, 0], [2, 1], [1, 2], [0, 3]],
+    [[1, 0], [2, 1], [3, 2], [4, 3]],
+    [[0, 1], [1, 2], [2, 3], [3, 4]],
+    [[1, 4], [2, 3], [3, 2], [4, 1]]
+];
+
+// 3-in-a-row where you don't want any 2 plus a blank
+var no2 = [
+    [[2, 0], [1, 1], [0, 2]],
+    [[0, 2], [1, 3], [2, 4]],
+    [[4, 2], [3, 3], [2, 4]],
+    [[4, 2], [3, 1], [2, 0]]
+];
+
+// Set up a 5x5 matrix of arrays of losing triplets
+// for use in check_winner() - indexed_losing_triplets[x][y]
+// is a list of losing triplets that contain the [x,y] mark.
+var indexed_losing_triplets = new Array();
+for (var m = 0; m < 5; ++m) {
+	indexed_losing_triplets[m] = new Array();
+	for (var n = 0; n < 5; ++n) {
+		indexed_losing_triplets[m][n] = new Array();
+	}
+}
+var triplets_count = 0;
+for (var i in losing_triplets) {
+	++triplets_count;
+	var triplets = losing_triplets[i];
+	for (var j in triplets) {
+		var pair = triplets[j];
+		indexed_losing_triplets[pair[0]][pair[1]].push(triplets);
+	}
+}
+
+// List of (x,y) coords of 4-in-a-row cells that
+// would win. Not used directly. Values used to
+// build indexed_winning_triplets below.
+var winning_quads = [
+	[[0, 0], [1, 0], [2, 0], [3, 0]],
+	[[0, 0], [0, 1], [0, 2], [0, 3]],
+	[[0, 0], [1, 1], [2, 2], [3, 3]],
+	[[0, 1], [1, 1], [2, 1], [3, 1]],
+	[[0, 1], [0, 2], [0, 3], [0, 4]],
+	[[0, 1], [1, 2], [2, 3], [3, 4]],
+	[[0, 2], [1, 2], [2, 2], [3, 2]],
+	[[0, 3], [1, 3], [2, 3], [3, 3]],
+	[[0, 4], [1, 4], [2, 4], [3, 4]],
+	[[1, 0], [2, 0], [3, 0], [4, 0]],
+	[[1, 0], [1, 1], [1, 2], [1, 3]],
+	[[1, 0], [2, 1], [3, 2], [4, 3]],
+	[[1, 1], [2, 1], [3, 1], [4, 1]],
+	[[1, 1], [1, 2], [1, 3], [1, 4]],
+	[[1, 1], [2, 2], [3, 3], [4, 4]],
+	[[1, 2], [2, 2], [3, 2], [4, 2]],
+	[[1, 3], [2, 3], [3, 3], [4, 3]],
+	[[1, 4], [2, 4], [3, 4], [4, 4]],
+	[[2, 0], [2, 1], [2, 2], [2, 3]],
+	[[2, 1], [2, 2], [2, 3], [2, 4]],
+	[[3, 0], [3, 1], [3, 2], [3, 3]],
+	[[3, 0], [2, 1], [1, 2], [0, 3]],
+	[[3, 1], [3, 2], [3, 3], [3, 4]],
+	[[3, 1], [2, 2], [1, 3], [0, 4]],
+	[[4, 0], [4, 1], [4, 2], [4, 3]],
+	[[4, 0], [3, 1], [2, 2], [1, 3]],
+	[[4, 1], [4, 2], [4, 3], [4, 4]],
+	[[4, 1], [3, 2], [2, 3], [1, 4]]
+];
+
+// Set up a 5x5 matrix of arrays of winning quads.
+// for use in check_winner() - indexed_winning_quads[x][y]
+// is a list of winning quads that contain the [x,y] mark.
+var indexed_winning_quads = new Array();
+for (var m = 0; m < 5; ++m) {
+	indexed_winning_quads[m] = new Array();
+	for (var n = 0; n < 5; ++n) {
+		indexed_winning_quads[m][n] = new Array();
+	}
+}
+for (var i in winning_quads) {
+	var quad = winning_quads[i];
+	for (var j in quad) {
+		var pair = winning_quads[i][j];
+		indexed_winning_quads[pair[0]][pair[1]].push(quad);
+	}
+}
+
+// Look through the board, decide if (1) the game is over,
+// and who won. So, two return values, which is a direct
+// carry-over from the Golang version. Formal arguments
+// x, y are the coords of the last move performed, so that
+// check_winner() doesn't have to look through all losing
+// triplets, and all winning quads, just the ones involving
+// the last move.
+function check_winner(x, y) {
+	var relevant_quads = indexed_winning_quads[x][y];
+	for (var idx in relevant_quads) {
+		var quad = relevant_quads[idx];
+		var sum = board[quad[0][0]][quad[0][1]];
+		sum += board[quad[1][0]][quad[1][1]];
+		sum += board[quad[2][0]][quad[2][1]];
+		sum += board[quad[3][0]][quad[3][1]];
+
+		if (sum == 4 || sum == -4) {
+			return [sum/4, true];
+		}
+	}
+	var relevant_losing_triplets = indexed_losing_triplets[x][y];
+	for (var idx in relevant_losing_triplets) {
+		var triplet = relevant_losing_triplets[idx];
+		var sum = board[triplet[0][0]][triplet[0][1]];
+		sum += board[triplet[1][0]][triplet[1][1]];
+		sum += board[triplet[2][0]][triplet[2][1]];
+
+		if (sum == 3 || sum == -3) {
+			return [-sum/3, true];  // The '-' means return winner
+		}
+	}
+	for (var idx in board) {
+		for (var j in board[idx]) {
+			if (board[idx][j] == 0) {
+				return [0, false];
+			}
+		}
+	}
+	// Get here, all 25 spots on board filled, no winning quadruplet
+	// I don't know if this can ever happen.
+	return [0, true];
+}
+
+function resetgame() {
+	// board = new Array(5); // Totally new board
+	for (var i = 0; i < 5; ++i) {
+		//board[i] = new Array(5);
+		for (var j = 0; j < 5; ++j) {
+			board[i][j] = 0;  // Zero the cells of the board
+			// 
+			var tdob = document.getElementById('td'+i+j);
+			tdob.innerHTML = '<input type="button" name="b'+i+j+'" onclick="clork('+i+', '+j+');" />';
+			tdob.style.backgroundColor = 'white';
+		}
+	}
+	move_counter = 0;
+	game_over = false;
+	bookOffense = false;
+	bookDefense = true;
+}
+
+function cfirst() {
+	bookOffenseState = 0;
+	bookOffense = true;
+	bookDefense = false;
+	game_over = false;
+	mymove();
+}
+</script>
+
+</head>
+<body>
+<h1>Squava</h1>
+	<form name="f">
+		<table border="1" class="fixed" >
+		<tbody>
+			<tr>
+					<td valign="middle" align="center" ><div id="td00"><input type="button" name="b00" onclick="clork(0, 0);" /></div></td>
+					<td valign="middle" align="center" ><div id="td10"><input type="button" name="b10" onclick="clork(1, 0);" /></div></td>
+					<td valign="middle" align="center" ><div id="td20"><input type="button" name="b20" onclick="clork(2, 0);" /></div></td>
+					<td valign="middle" align="center" ><div id="td30"><input type="button" name="b30" onclick="clork(3, 0);" /></div></td>
+					<td valign="middle" align="center" ><div id="td40"><input type="button" name="b40" onclick="clork(4, 0);" /></div></td>
+			</tr>
+			<tr>
+					<td valign="middle" align="center" ><div id="td01"><input type="button" name="b01" onclick="clork(0, 1);" /></div></td>
+					<td valign="middle" align="center" ><div id="td11"><input type="button" name="b11" onclick="clork(1, 1);" /></div></td>
+					<td valign="middle" align="center" ><div id="td21"><input type="button" name="b21" onclick="clork(2, 1);" /></div></td>
+					<td valign="middle" align="center" ><div id="td31"><input type="button" name="b31" onclick="clork(3, 1);" /></div></td>
+					<td valign="middle" align="center" ><div id="td41"><input type="button" name="b41" onclick="clork(4, 1);" /></div></td>
+			</tr>
+			<tr>
+					<td valign="middle" align="center" ><div id="td02"><input type="button" name="b02" onclick="clork(0, 2);" /></div></td>
+					<td valign="middle" align="center" ><div id="td12"><input type="button" name="b12" onclick="clork(1, 2);" /></div></td>
+					<td valign="middle" align="center" ><div id="td22"><input type="button" name="b22" onclick="clork(2, 2);" /></div></td>
+					<td valign="middle" align="center" ><div id="td32"><input type="button" name="b32" onclick="clork(3, 2);" /></div></td>
+					<td valign="middle" align="center" ><div id="td42"><input type="button" name="b42" onclick="clork(4, 2);" /></div></td>
+			</tr>
+			<tr>
+					<td valign="middle" align="center" ><div id="td03"><input type="button" name="b03" onclick="clork(0, 3);" /></div></td>
+					<td valign="middle" align="center" ><div id="td13"><input type="button" name="b13" onclick="clork(1, 3);" /></div></td>
+					<td valign="middle" align="center" ><div id="td23"><input type="button" name="b23" onclick="clork(2, 3);" /></div></td>
+					<td valign="middle" align="center" ><div id="td33"><input type="button" name="b33" onclick="clork(3, 3);" /></div></td>
+					<td valign="middle" align="center" ><div id="td43"><input type="button" name="b43" onclick="clork(4, 3);" /></div></td>
+			</tr>
+			<tr>
+					<td valign="middle" align="center" ><div id="td04"><input type="button" name="b04" onclick="clork(0, 4);" /></div></td>
+					<td valign="middle" align="center" ><div id="td14"><input type="button" name="b14" onclick="clork(1, 4);" /></div></td>
+					<td valign="middle" align="center" ><div id="td24"><input type="button" name="b24" onclick="clork(2, 4);" /></div></td>
+					<td valign="middle" align="center" ><div id="td34"><input type="button" name="b34" onclick="clork(3, 4);" /></div></td>
+					<td valign="middle" align="center" ><div id="td44"><input type="button" name="b44" onclick="clork(4, 4);" /></div></td>
+			</tr>
+		</tbody>
+		</table>
+		<br/>
+		<input type="button" name="rstbtn" value="New Game" onclick="resetgame();" />
+		<br/>
+		<input type="button" name="firstbtn" value="Computer First" onclick="cfirst();" />
+	</form>
+</body>
+</html>
