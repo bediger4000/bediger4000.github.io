@@ -1,0 +1,272 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML Basic 1.0//EN" "file:///home/bediger/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta name="generator" content="HTML Tidy, see www.w3.org" />
+<title>Using ftp in a shell script</title>
+<meta name="google-site-verification" content="ixC4wtdetOlWNosRSwl6CFgRutGwfbq_9r9z534uRkY" />
+<meta name="description"
+content="Unix shell script code using ftp client" />
+<meta name="keywords" content="shell script, sh, ftp, client" />
+</head>
+<body>
+<center>
+<h1>How to use ftp in a shell script</h1>
+</center>
+
+<center><a href="mailto:bediger@stratigery.com">Bruce Ediger</a></center>
+<center><a href="http://www.stratigery.com/index.html">Bruce Ediger's home page</a></center>
+<hr/>
+<script type="text/javascript" language="JavaScript">
+<!--
+var re = /.*windows.*/i;
+var chars = "--><!--";var lt=chars.charAt(3);var gt=chars.charAt(2);var br=lt+"BR"+gt;
+if(navigator.appName=="Netscape"){
+document.write("Party on!"+br+"Continue using Mozilla's browser."+br);
+}else if(navigator.appName=="Microsoft Internet Explorer"){
+document.write(lt+"FONT COLOR='#FF0000'"+gt+"Dare to be different. Download "
++lt+"A HREF=\"http://www.mozilla.com/\""+gt+"Mozilla Firefox"+
+lt+"/a"+gt+" now!"+lt+"/FONT"+gt+br);}else{document.write("Thank you for not"+
+" using Microsoft Internet Explorer."+br);}
+if(re.exec(navigator.userAgent)){document.write(br+"You might also consider using Linux. It's faster and has less malware.")};
+//-->
+</script>
+
+<p>Sometimes I want to FTP a file from one machine to another.
+Usually, I can do the transfer interactively, but every so often, I
+would like to have a shell script do the file transfer. This task
+has eluded me in the past, but I finally figured it out. I've not
+seen this particular trick documented in the past, so I submit it
+for your approval.</p>
+
+<h2>The Problem</h2>
+
+<p>The problem I always encountered in scripting ftp transfers
+involved getting a password to the ftp server. Typical ftp client
+programs under Unix, Linux, Solaris and NetBSD all read the ftp
+password from <kbd>/dev/tty</kbd>.</p>
+
+<h2>Example (non-working) script</h2>
+
+<pre>
+<kbd>#!/bin/sh
+HOST='ftp.users.qwest.net'
+USER='yourid'
+PASSWD='yourpw'
+FILE='file.txt'
+
+ftp $HOST &lt;&lt;END_SCRIPT
+user $USER
+$PASSWD
+put $FILE
+quit
+END_SCRIPT
+exit 0
+</kbd>
+</pre>
+
+<p>The above script will just hang if run in the foreground (in an
+xterm), or if run in the background (from a cron job), it will fail
+to perform the work of transferring <kbd>file.txt</kbd>.</p>
+
+<p><kbd>/dev/tty</kbd> names a strange, magic device. Each process
+(more strictly each process group) has a different
+<kbd>/dev/tty</kbd>, and you can not naively make ftp clients read
+the password from some non-magic, yet convenient source, like a
+"here document". When run in an xterm, the script above appears to
+hang because it reads the password from <kbd>/dev/tty</kbd>. The
+xterm constitutes the script's <kbd>/dev/tty</kbd>, so the script
+waits for keyboard input.</p>
+
+<h2>Example Working Script</h2>
+
+<pre>
+<kbd>#!/bin/sh
+HOST='ftp.users.qwest.net'
+USER='yourid'
+PASSWD='yourpw'
+FILE='file.txt'
+
+ftp -n $HOST &lt;&lt;END_SCRIPT
+quote USER $USER
+quote PASS $PASSWD
+put $FILE
+quit
+END_SCRIPT
+exit 0
+</kbd>
+</pre>
+
+<h2>The Tricks</h2>
+
+<p>
+Getting the password to the ftp server without having the ftp
+client program read the password from <kbd>/dev/tty</kbd> requires
+two tricks: 
+</p>
+
+<ol>
+<li>Using the <kbd>-n</kbd> option on the ftp client program to
+prevent the ftp client from trying to log in immediately. That way,
+the ftp client does not ask for a user ID and password. No use of
+<kbd>/dev/tty</kbd>.</li>
+
+<li>Use the ftp client program command <kbd>quote</kbd> to send
+user ID and password to the ftp server.</li>
+</ol>
+
+<p>
+You must the token that ends the "here document" (<kbd>END_SCRIPT</kbd> in
+the example above) at the beginning of a line. Even if the <kbd>ftp</kbd>
+command line and the login and transfer script are indented, <kbd>END_SCRIPT</kbd>
+should appear with the 'E' as the first character of the line.
+</p>
+
+<h2>Further Refinements</h2>
+
+The above <kbd>sh</kbd> script will spew lots of ftp client output
+to standard output. Even if everything works perfectly, the user
+running the above script will see lots of incomprehensible text
+scrolling by quite rapidly. One refinement would send output to
+different places: 
+
+<pre>
+<kbd>ftp -n $HOST &gt; /tmp/ftp.worked 2&gt; /tmp/ftp.failed &lt;&lt;END_SCRIPT
+</kbd>
+</pre>
+
+One could further refine error handling by acting on the ftp client
+program's exit status: 
+
+<pre>
+<kbd>ftp -n $HOST &gt; /tmp/ftp.worked 2&gt; /tmp/ftp.failed &lt;&lt;END_SCRIPT
+<em>blah blah</em>
+END_SCRIPT
+
+EXITSTATUS=$?
+
+if [ $EXITSTATUS != "0" ]
+then
+    # handle the error...
+fi 
+</kbd>
+</pre>
+<p>Except that the above doesn't always work - most FTP clients always
+exit with a status of 0.  This leads to ugly "false negatives": the file
+transfer fails, but the script doesn't detect the problem.</p>
+<p>
+One way to verify that a file transfer
+took place - transfer it back:</p>
+<pre><kbd>
+#!/bin/sh
+
+ftp -n &lt;&lt; END_SCRIPT
+open $1
+user $2 $3
+put $4
+get $4 retrieval.$$
+bye
+END_SCRIPT
+
+if [ -f retrieval.$$ ]
+then
+	echo &quot;FTP of $4 to $1 worked&quot;
+	rm -f retrieval.$$
+else
+	echo &quot;FTP of $4 did not work&quot;
+fi
+</kbd></pre>
+<p>Regular FTPs there and back of large files can consume a lot of time.</p>
+
+<h2>Control of ftp by a shell script</h2>
+
+<p>One obvious improvement would have the ftp client program
+controlled by the shell script. I don't think that would comprise
+an impossible task, but I also don't think that it would have much
+value. Scripting ftp transfer using <a
+href="http://expect.nist.gov">expect</a> might cause you less pain.
+</p>
+
+<hr />
+<h3>Alternative #1</h3>
+<p>I saw a second way of doing this in a usenet article:</p>
+
+<pre>
+<kbd>#!/bin/sh
+USER=userid
+PASSWD=userpw
+ftp -n f2dev &lt;&lt;SCRIPT
+user $USER $PASSWD
+binary
+get some.file
+quit
+SCRIPT
+</kbd>
+</pre>
+<p>It still uses the "-n" trick, but it sends user ID and password
+in the same "user" command.</p>
+<hr />
+<h3>Alternative #2</h3>
+<strong>Use a .netrc file</strong>
+<p>Linux, Unix and BSD users have the alternative of using a <kbd>.netrc</kbd>
+file. The ftp man page documents the format of <kbd>.netrc</kbd>. To accomplish
+the task of using ftp in a shell script you would have to fill out a
+<kbd>.netrc</kbd> file something like this:</p>
+<pre>
+<kbd>
+machine something.else.com
+login myid
+password mypassword
+</kbd>
+</pre>
+<p>ftp demands that <kbd>.netrc</kbd> not have group or world read or
+write permissions:</p>
+<pre>
+<kbd>
+$ ls -l .netrc
+-rw-------    1 bediger  users          51 Dec 16 13:30 .netrc
+</kbd>
+</pre>
+<p>Using a  <kbd>.netrc</kbd> file has a few problems that may or may
+not prevent you from using it.</p>
+<ul>
+<li>A shell scripkt that does FTP using .netrc is no longer self-contained.
+You have to keep track of two files, which means that bugs can be less
+than obvious.
+</li>
+<li>ftp reads it's user ID's  <kbd>.netrc</kbd>.  If you develop your script
+under a given user ID, then put it in production under a second user ID,
+you have to coordinate .netrc file contents between those two user IDs.
+</li>
+</ul>
+<hr/>
+<h3>Alternative #3</h3>
+<p>
+Apparently, the <a href="http://www.columbia.edu/kermit/ck80.html">Ckermit</a> program from Columbia University understands
+FTP.   You could use Ckermit to <a href="http://www.columbia.edu/kermit/ftpscripts.html">script FTP transfers</a>.
+This looks to have advantages and disadvantages.  On the "pro" side, 
+it appears that Ckermit can exit on various errors, like unknown user IDs,
+or bad passwords.  On the "con" side, you have to have Ckermit. I don't
+recall that it had a too onerous install, but it doesn't come with many
+Linux distros these days, and it probably doesn't come with any vendor
+Unix.
+</p>
+<hr/>
+<em>$Id$</em>
+<!--
+Sun Jul 15 13:28:35 MDT 2001 - created
+  -->
+<!--[if !(lte IE 8)]><!-->
+<script type="text/javascript"> 
+  // @license magnet:?xt=urn:btih:0b31508aeb0634b347b8270c7bee4d411b5d4109&dn=agpl-3.0.txt GPL-v3-or-Later
+  (function(){
+    var e = document.createElement('script'); e.type='text/javascript'; e.async = true;
+    e.src = document.location.protocol + '//d1agz031tafz8n.cloudfront.net/thedaywefightback.js/widget.min.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(e, s);
+  })();
+  // @license-end
+</script>
+<!--<![endif]-->
+</body>
+</html>
+
