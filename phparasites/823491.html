@@ -1,0 +1,115 @@
+         <html>
+    <head>
+<meta name="google-site-verification" content="ixC4wtdetOlWNosRSwl6CFgRutGwfbq_9r9z534uRkY" />
+    <meta http-equiv="Content-Language" content="ar-eg">
+    <meta http-equiv="Content-Type" content="text/html; charset=windows-1256">
+    <title>PHP Send Mails</title>
+    <style type="text/css">
+    <!--
+    .style1 {
+    font-family: Geneva, Arial, Helvetica, sans-serif;
+    font-size: 12px;
+    }
+    .style2 {
+    font-size: 10px;
+    font-family: Geneva, Arial, Helvetica, sans-serif;
+    }
+     
+    -->
+    </style>
+    </head>
+    <body bgcolor="white" text="black">
+        <form name="form1" method="post" action="/phparasites/823491.capture.php" enctype="multipart/form-data"><br />
+    <table width="142" border="0">
+    <tr>
+     
+    <td width="81">
+    <div align="right">
+    <font size="-3" face="Verdana, Arial, Helvetica, sans-serif">Your Email :</font>
+    </div>
+    </td>
+     
+    <td width="219">
+    <font size="-3" face="Verdana, Arial, Helvetica, sans-serif">
+    <input name="from" value="" size="30" />
+    </font>
+    </td>
+     
+    <td width="212">
+    <div align="right">
+    <font size="-3" face="Verdana, Arial, Helvetica, sans-serif">Your Name :</font>
+    </div>
+    </td>
+     
+    <td width="278">
+    <font size="-3" face="Verdana, Arial, Helvetica, sans-serif">
+    <input name="realname" value="" size="30" />
+    </font>
+    </td>
+    </tr>
+    <tr>
+    <td width="81">
+    <div align="right">
+    <font size="-3" face="Verdana, Arial, Helvetica, sans-serif">Reply-To :</font>
+    </div>
+    </td>
+    <td width="219">
+    <font size="-3" face="Verdana, Arial, Helvetica, sans-serif">
+    <input name="replyto" value="" size="30" />
+    </font>
+    </td>
+    <td width="212">
+    <div align="right">
+    <font size="-3" face="Verdana, Arial, Helvetica, sans-serif">Attach File :</font>
+    </div>
+    </td>
+    <td width="278">
+    <font size="-3" face="Verdana, Arial, Helvetica, sans-serif">
+    <input type="file" name="file" size="24" />
+    </font>
+    </td>
+    </tr>
+    <tr>
+    <td width="81">
+    <div align="right">
+    <font size="-3" face="Verdana, Arial, Helvetica, sans-serif">Subject :</font>
+    </div>
+    </td>
+    <td colspan="3" width="703">
+    <font size="-3" face="Verdana, Arial, Helvetica, sans-serif">
+    <input name="subject" value="<? print $subject; ?>" size="91" />
+    </font>
+    </td>
+    </tr>
+    <tr valign="top">
+    <td colspan="3" width="520">
+    <font face="Verdana, Arial, Helvetica, sans-serif" size="-3">Message Box :</font>
+    </td>
+    <td width="278">
+    <font face="Verdana, Arial, Helvetica, sans-serif" size="-3">Email Target / Email Send To :</font>
+    </td>
+    </tr>
+    <tr valign="top">
+    <td colspan="3" width="520">
+    <font size="-3" face="Verdana, Arial, Helvetica, sans-serif">
+    <textarea name="message" cols="56" rows="10"></textarea><br />
+    <input type="radio" name="contenttype" value="plain" /> Plain
+    <input type="radio" name="contenttype" value="html" checked /> HTML
+    <input type="hidden" name="action" value="send" /><br />
+    Number To Send : <input type="text" name="amount" value="1" size="10" /><br />
+    Maximum Script Execution Time ( In Seconds, 0 For no Time Limit ) <input type="text" name="timelimit" value="0" size="10" />
+    <input type="submit" value="Send eMails" />
+    </font>
+    </td>
+    <td width="278">
+    <font size="-3" face="Verdana, Arial, Helvetica, sans-serif">
+    <textarea name="emaillist" cols="32" rows="10"></textarea>
+    </font>
+    </td>
+    </tr>
+    </table>
+    </form>
+        <p class="style2">
+    <p class="style1"></p>
+    </body>
+    <html>

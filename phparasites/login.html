@@ -1,0 +1,244 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+<head>
+<title>PHParasites:  WordPress Malware</title>
+<meta name="google-site-verification" content="ixC4wtdetOlWNosRSwl6CFgRutGwfbq_9r9z534uRkY" />
+<meta http-equiv="content-type" content="text/html; charset=utf-8">
+<style type="text/css">
+html,body{margin:0;padding:0}
+body{font: 76% arial,sans-serif}
+p{margin:0 10px 10px}
+div#header h1{height:80px;line-height:80px;margin:0; padding-left:10px;background: #EEE;color: #79B30B}
+div#subheader h2{height:15px;line-height:15px;margin:5px; padding-left:10px;color: #79B30B}
+div#subsubheader h3{height:10px;line-height:10px;margin:5px; padding-left:12px;color: #79B30B}
+div#content p{line-height:1.4}
+div#content pre{line-height:1.4;margin:5px;font:100% courier;}
+div#content table{margin:10px;}
+div#content kbd{font:100% courier;}
+div#navigation{background:#B9CAFF}
+div#extra{background:#FF8539}
+div#footer{background: #333;color: #FFF}
+div#footer p{margin:0;padding:5px 10px}
+div#wrapper{float:left;width:100%}
+div#content{margin: 0 25%}
+div#navigation{float:left;width:25%;margin-left:-100%}
+div#extra{float:left;width:25%;margin-left:-25%}
+div#footer{clear:left;width:100%}
+</style>
+</head>
+<body>
+<div id="container">
+<div id="header">
+	<h1>PHParasites: WordPress Malware</h1>
+</div>
+<div id="wrapper">
+<div id="content">
+<div id="subheader"><h2>WSO Session Example</h2></div>
+<p>
+The following table lists the HTTP requests made by 91.197.19.103 during a distinct
+session. The table combines information from Apache <kbd>httpd</kbd> log files,
+and <kbd>p0f</kbd> log files. I use data logged by my WordPress emulation to track
+cookies and HTTP request data, as elaborated on in the notes below the table.
+</p>
+<p>
+I group the HTTP requests as a session because the same IP address
+made an identical set of requests (same URLs) between 2013-06-24T11:08:04-06
+and 2013-06-24T11:48:14-06. It made the first 7 requests of the
+session between 2013-06-26T11:18:41-06 and 2013-06-26T11:18:55-06
+and again between 2013-06-26T13:07:38-06 and 2013-06-26T13:08:13-06.
+Beginning at 2013-06-26T13:21:58-06, 91.197.19.103 embarked on a similar
+session, but rather than uploading <kbd>502.php</kbd> as a single ".php"
+file plugin, it tried to use WordPress' theme editor to do something
+with the <kbd>404.php</kbd> page. My WordPress emulation
+didn't extend to this level of detail, so the attacker seems to have
+abandonded my honey pot after that attempt.
+</p>
+<p>
+<kbd>p0f</kbd> consistently identified 91.197.19.103 as a Windows machine,
+mostly as "Windows Vista SP0/SP2, 7 SP0+, 2008 SP0", always at a distance of 9
+router hops from my machine. DNS identifies that IP address as
+"NAT-103.astra.od.ua", and <kbd>nmap</kbd> thinks that IP address either is a
+firewall or is behind a firewall, which runs some kind of Linux.
+</p>
+<p>
+Several recurring patterns in Wordpress malware manifest in the following session:
+</p>
+<ul>
+	<li>Use of guessed password and admin user ID.</li>
+	<li>Multiple attempts of error-prone operations.</li>
+	<li>Use of WSO as a file-downloader back end.</li>
+	<li>Puzzling bugs or apparently non-working code or protocol steps.</li>
+</ul>
+<table border="0">
+<tr><th></th><th>Timestamp</th><th>From TCP Port</th><th>URI</th><th>Downloaded File</th></tr>
+	<tr><td align="right">1.</td><td>2013-06-26T11:32:48-06</td><td align="center">49250</td><td>/wp-login.php</td><td></td></tr>
+	<tr><td align="right">2.</td><td>2013-06-26T11:32:52-06</td><td align="center">49332</td><td>/wp-admin/index.php</td><td align="right"></td></tr>
+	<tr><td align="right">3.</td><td>2013-06-26T11:32:54-06</td><td align="center">49453</td><td>/wp-admin/plugin-install.php?tab=upload</td><td align="right"></td></tr>
+	<tr><td align="right">4.</td><td>2013-06-26T11:32:56-06</td><td align="center">49494</td><td>/wp-admin/update.php?action=upload-plugin</td><td align="right">wp_add.zip</td></tr>
+	<tr><td align="right">5.</td><td>2013-06-26T11:32:59-06</td><td align="center">49570</td><td>/wp-admin/plugin-install.php?tab=upload</td><td align="right"></td></tr>
+	<tr><td align="right">6.</td><td>2013-06-26T11:33:00-06</td><td align="center">49598</td><td>/wp-admin/update.php?action=upload-plugin</td><td align="right"><a href="wso.html">502.php</a></td></tr>
+	<tr><td align="right">7.</td><td>2013-06-26T11:33:05-06</td><td align="center">49700</td><td>/wp-content/uploads/2013/06/502.php</td><td align="right"></td></tr>
+	<tr><td align="right">8.</td><td>2013-06-26T11:35:15-06</td><td align="center">52386</td><td>/wp-content/uploads/2013/06/502.php</td><td align="right"></td></tr>
+	<tr><td align="right">9.</td><td>2013-06-26T11:35:16-06</td><td align="center">52562</td><td>/wp-content/uploads/2013/06/502.php</td><td align="right"><a href="gateway.html">get3.php</a></td></tr>
+	<tr><td align="right">10.</td><td>2013-06-26T11:35:19-06</td><td align="center">52606</td><td>/wp-content/uploads/2013/06/502.php</td><td align="right"></td></tr>
+	<tr><td align="right">11.</td><td>2013-06-26T12:23:38-06</td><td align="center">53163</td><td>/wp-content/uploads/2013/06/502.php</td><td align="right"></td></tr>
+	<tr><td align="right">12.</td><td>2013-06-26T12:23:39-06</td><td align="center">53191</td><td>/wp-content/uploads/2013/06/502.php</td><td align="right">get3.php</td></tr>
+	<tr><td align="right">13.</td><td>2013-06-26T12:23:41-06</td><td align="center">53244</td><td>/wp-content/uploads/2013/06/502.php</td><td align="right"></td></tr>
+	<tr><td align="right">14.</td><td>2013-06-26T12:41:46-06</td><td align="center">60558</td><td>/wp-content/uploads/2013/06/502.php</td><td align="right"></td></tr>
+	<tr><td align="right">15.</td><td>2013-06-26T12:41:48-06</td><td align="center">60637</td><td>/wp-content/uploads/2013/06/502.php</td><td align="right">get3.php</td></tr>
+	<tr><td align="right">16.</td><td>2013-06-26T12:41:52-06</td><td align="center">60759</td><td>/wp-content/uploads/2013/06/502.php</td><td align="right"></td></tr>
+</table>
+<p>
+I believe these requests are done automatically, or at least
+semi-automatically.  The timestamps aren't close together, so conceivably a
+human could make the clicks. However, the remote entity doesn't request CSS
+files or <kbd>/favicon.ico</kbd>, which a browser ordinarily would request based
+on HTML generated by <kbd>/wp-admin/index.php</kbd> and
+<kbd>/wp-admin/plugin-install.php</kbd>. The (fake) admin user ID and password
+also get passed to <kbd>/wp-login.php</kbd> on the first try, without calling
+<kbd>/wp-login.php</kbd> to generate the login form for a human to see.
+<kbd>502.php</kbd> gets
+invoked the same way: no initial call to get login form HTML. Either a program
+did the HTTP requests, or a human user guided a program doing the
+requests.
+</p>
+<p>
+Based on the TCP/IP source port numbers, a single machine makes all the HTTP
+requests. Given the gaps between port numbers, that single machine did other
+TCP things involving connection creation between HTTP requests of my honey pot.
+Although the source port numbers only increase, there's no rhyme or reason in
+the increments. This tends to support the human-guided-program hypothesis,
+where the program does a general sequence of {guess password, install plugin,
+use plugin} in parallel on many different remote WordPress hosts.
+It could also be evidence of a  human guiding a program on some stepping-stone
+host that's not only searching for and exploiting other hosts, but also
+sending spam or doing other bad things.
+</p>
+<div id="subheader"><h2>Notes</h2></div>
+<p><strong>1.&nbsp;</strong>
+First call to <kbd>/wp-login.php</kbd> has the following HTTP request data:
+</p>
+<table border="1">
+    <tr><td><kbd>log</kbd></td><td><kbd>{domain}</kbd></td></tr>
+    <tr><td><kbd>pwd</kbd></td><td><kbd>1234qwer</kbd></td></tr>
+    <tr><td><kbd>redirect_to</kbd></td><td><kbd>www.stratigery.com/wp-admin/</kbd></td></tr>
+    <tr><td><kbd>testcookie</kbd></td><td><kbd>1</kbd></td></tr>
+</table>
+<p>
+<kbd>wp-login.php</kbd> sets two cookies, one named "wordpress_<em>something</em>"
+and one named "wordpress_logged_in_<em>something</em>".
+My <kbd>wp-login.php</kbd> uses a timestamp, the value of <kbd>$_SERVER['REQUEST_TIME']</kbd>
+for "<em>something</em>", which allows me to track cookies from one URL's invocation to the
+next, provided the requester does cookies correctly.
+</p>
+<p>
+The WordPress admin login ID used was "{domain}", with a password
+of "1234qwer".  I have to wonder if the string "{domain}" isn't
+the result of a bug in, or failure to do, macro processing.  That is,
+the string literal "{domain}" should have gotten translated into
+"stratigery.com" or "stratigery" by the password guessing program.
+Certainly other IP addresses have guessed "stratigery", "stratigery.com",
+"stratigeryabc123", "123stratigery" and "stratigery123" as passwords.
+91.197.19.103 guessed that user ID/password combo on
+2013-06-24 11:08:04-06, 2013-06-26 11:32:48-06, 2013-06-26 13:21:58-06.
+The current article elaborates on the session resulting from the 2013-06-26 11:32:48-06 guess,
+but similar sessions followed both other guesses.
+</p>
+<p><strong>2.&nbsp;</strong>
+91.197.19.103 requests (HTTP GET) <kbd>/wp-admin/index.php</kbd>, as its original
+redirect asked for, and <kbd>wp-login.php</kbd> sent in a HTTP 302 response.
+Cookies sent as <kbd>wp-login.php</kbd> set them.
+</p>
+<p><strong>3.&nbsp;</strong>
+91.197.19.103 requests <kbd>/wp-admin/plugin-install.php?tab=upload</kbd>
+complete with WordPress emulation cookies as <kbd>wp-login.php</kbd> set.
+</p>
+<p><strong>4.&nbsp;</strong>
+91.197.19.103 sends (HTTP POST) <kbd>wp_add.zip</kbd> as a plugin upload.
+</p>
+<p>
+The <kbd>wp_add.zip</kbd> file has this as contents:
+</p>
+<pre>
+ Length      Date    Time    Name
+---------  ---------- -----   ----
+        0  2013-05-28 13:34   wp_add/
+     2433  2012-11-28 21:33   wp_add/class-wp-importer-cron.php
+    88169  2013-05-16 02:18   wp_add/mod_system.php
+    39301  2012-11-28 21:33   wp_add/tumblr-importer.php
+---------                     -------
+   129903                     4 files
+</pre>
+<p>
+Note that the <kbd>wp_add/</kbd> directory has a later timstamp than the
+<kbd>mod_system.php</kbd> file - the plugin got renamed after
+<kbd>mod_system.php</kbd> got added to the zip file or directory.
+<kbd>mod_system.php</kbd> is the WSO v2.5 shell included in the plugin.
+I susepect that not only does the WSO shell file get new names to avoid casual
+human dectection, but the plugin and directory get renamed often because the
+program installs a plugin every time it tries to install some malware.
+</p>
+<p><strong>5.&nbsp;</strong>
+91.197.19.103 requests <kbd>/wp-admin/plugin-install.php?tab=upload</kbd>,
+the plugin upload page, again.
+</p>
+<p><strong>6.&nbsp;</strong>
+91.197.19.103 sends (HTTP POST) <kbd>502.php</kbd> as a plugin upload.
+Same method as for the <kbd>wp_add.zip</kbd>, but the MIME-type
+changed from "application/zip" to "text/plain" for <kbd>502.php</kbd>.
+</p>
+<p>
+In both cases, the WordPress emulation code claims that the plugin
+upload suceeded.
+</p>
+<p>
+<kbd>502.php</kbd> in this case is an obfuscated WSO v2.5 web
+shell, using password "4500045". The obfuscation amounted to
+eval'ing a base64-encoded text string, so not very sophisticated.
+<kbd>502.php</kbd> and <kbd>mod_system.php</kbd>,
+the WSO file inside the <kbd>wp_add.zip</kbd> plugin file, are byte-for-byte identical.
+</p>
+<p><strong>7. - 16. &nbsp;</strong>
+The calls to <kbd>502.php</kbd> alternate downloads of <kbd>get3.php</kbd>, a
+<a href="gateway.html">file retrieval gateway</a>, and file listings via
+"FilesMan" action of the "/" directory. This particular FilesMan listing just
+doesn't work.  WSO claims that the folder doesn't exist. I suspect that "./"
+became "/" due to a typo or to inadequate knowledge of Linux. It certainly
+demonstrates incomplete testing.  I further conjecture that <kbd>get3.php</kbd>
+was never invoked because the downloader program never observed a file named
+"get3.php" when invoking the directory listing "FilesMan" action of WSO.  Note
+that the downloader went through three cycles of login-download-list in each
+session before giving up.
+</p>
+</div>
+</div>
+
+<div id="navigation">
+<div id="subheader"><h2>Sections</h2></div>
+<ul>
+	<li><a href="index.html">Introduction</a>.</li>
+	<li><a href="details.html">Honey Pot Details</a></li>
+	<li><a href="access.html">Obtaining Access</a></li>
+	<li><a href="comment_spam.html">Spam Posts</a></li>
+	<li><a href="wso.html">WSO Web Shell</a></li>
+	<li>WSO Session Example</li>
+	<li><a href="emailers.html">Email Spam Tools</a></li>
+	<li><a href="recon.html">Reconnaissance Tools</a></li>
+	<li><a href="gateway.html">File Retrieval Gateway</a></li>
+	<li><a href="testm.html">Obfuscated Code Champion</a></li>
+	<li><a href="backdoors.html">Back Doors</a></li>
+</ul>
+</div>
+
+<div id="extra">
+<div id="subheader"><h2>Author</h2></div>
+<p>
+<a href="mailto:bediger@stratigery.com">Bruce Ediger</a>, October, 2013.
+</p>
+<p>
+</p>
+</div>
+<div id="footer"><p>Up to Bruce Ediger's <a style="color:white;" href="/">Web pages</a>.</p></div>
+</div>
+</body>
+</html>

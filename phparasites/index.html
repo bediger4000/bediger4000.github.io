@@ -1,0 +1,238 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+<head>
+<title>PHParasites:  WordPress Malware</title>
+<meta name="google-site-verification" content="ixC4wtdetOlWNosRSwl6CFgRutGwfbq_9r9z534uRkY" />
+<meta http-equiv="content-type" content="text/html; charset=utf-8">
+<style type="text/css">
+html,body{margin:0;padding:0}
+body{font: 76% arial,sans-serif}
+p{margin:0 10px 10px}
+div#header h1{height:80px;line-height:80px;margin:0; padding-left:10px;background: #EEE;color: #79B30B}
+div#subheader h2{height:15px;line-height:15px;margin:5px; padding-left:10px;color: #79B30B}
+div#subsubheader h3{height:10px;line-height:10px;margin:5px; padding-left:12px;color: #79B30B}
+div#content p{line-height:1.4}
+div#content pre{line-height:1.4;margin:5px;font:100% courier;}
+div#content kbd{font:100% courier;}
+div#navigation{background:#B9CAFF}
+div#extra{background:#FF8539}
+div#footer{background: #333;color: #FFF}
+div#footer p{margin:0;padding:5px 10px}
+div#wrapper{float:left;width:100%}
+div#content{margin: 0 25%}
+div#navigation{float:left;width:25%;margin-left:-100%}
+div#extra{float:left;width:25%;margin-left:-25%}
+div#footer{clear:left;width:100%}
+</style>
+</head>
+<body>
+<div id="container">
+<div id="header">
+	<h1>PHParasites:  WordPress Malware</h1>
+</div>
+<div id="wrapper">
+<div id="content">
+<div id="subheader"><h2>Introduction</h2></div>
+<p>
+For years, I had dutifully read through my personal web server's
+log files. I had seen something with a User-agent of "ZmEu" get 404
+codes hundreds of times. I had seen IP addresses try to log in to 
+non-existent WordPress blogs thousands of times. I decided to try my luck at
+capturing some of what the folks trying to log in to WordPress had to offer.
+<!--
+Actual targeted, professional scans: http://blog.shadowserver.org/2013/05/06/breaking-the-kill-chain-with-log-analysis/
+-->
+</p>
+<p>
+Between May, 2013 and September, 2013 I ran a WordPress honey pot.
+This documents the malware that people downloaded to that honey pot.
+I'm writing it down to ensure that I have a clear picture of what went
+on while I ran the honey pot.
+</p>
+<p>
+Previous to the more complete honey pot, I had written a PHP
+tarpit to observe HTTP requests from  the
+"ZmEu" <a href="http://serverfault.com/questions/202822/how-to-thwart-phpmyadmin-attacks">phpMyAdmin vulnerability scanner</a>.
+I also had a WordPress login page that just caught login attempts.  After that,
+I did a WordPress 3.5 lookalike. Although it got scanned for log ins many
+times, nothing got downloaded.  I moved to a honey pot that closely resembled
+WordPress 2.9.2.  It looked just enough like real WordPress to fool some
+entities into interacting with it.  The honey pot showed a few posts, it
+appeared to register users, it appeared to allow any username/password
+combination in as the administrative user.  It appeared to allow theme and
+plugin upload, which it always said succeeded.  It appeared to allow new posts.
+</p>
+<p>
+I logged HTTP requests, ran a <kbd>p0f</kbd> passive OS detector, and had my
+emulated code log a large amount of detail. I organized all this data in a <a
+href="dbdesign.html">relational database</a>. Because of the database, I can
+match downloads to IP addresses and methods of download.  I can see what called
+a downloaded program, when, and with what HTTP parameters.  Further, I captured PHP
+code that otherwise doesn't reside in the filesystem at all.
+</p>
+<p>
+I hope to include enough detail about the honey pot to be believeable,
+yet not rehashing code analyses done better elsewhere. I do include my own
+analyses of pieces of code that I can't find analyzed or reported elsewhere,
+or to make a point about how the WordPress malware world seems to work.
+</p>
+<div id="subheader"><h2>Running an Effective WordPress Honey Pot</h2></div>
+<p>
+I have evidence or experience to back up the following
+assertions or advice on honey pot niceities. But your mileage may vary.
+<a href="mailto:bediger@stratigery.com">Let me know</a>
+if you have good or bad experiences with the following tips.
+</p>
+<p>
+All of your emulated WordPress pages should save the contents of PHP
+globals <kbd>$_SERVER</kbd>, <kbd>$_REQUEST</kbd>, <kbd>$_COOKIE</kbd>
+and <kbd>$_FILES</kbd>. The latter global allows your code to save any
+uploaded files, and all emulated WordPress pages should save uploaded files.
+You should handle HTTP cookies exactly as WordPress does, generating
+cookies on "successful" login.  If you can track these WordPress-login-cookies,
+you can see what IP address performed the first login versus what address
+used that login cookie.
+</p>
+<p>
+My honey pot allowed any user ID/password to login as the WordPress
+admin user. I've not decided if this was a good idea or not. Perhaps
+only allowing logins after a small number of consecutive attempts,
+or randomly allowing a small percentage of log in guesses in would
+allow a honey pot to capture more malware.
+</p>
+<p>
+Allow registration of mere users.
+Allow theme editing and plugin uploads, always claim success.
+Include new post uploading in your WordPress emulation.  It will entertain.
+</p>
+<p>
+Install a WSO ("FilesMan") web shell emulation. A lot of entities use WSO as an
+uploader.  It may be worth your while to make the WSO emulator the
+default for any ".php" URL under <kbd>./wp-content/</kbd>.
+That is, invoke the WSO PHP instead of just giving out an HTTP 404 code.
+The WSO emulation needs to be
+able to look like remote users log in, accepting any password.  Your WSO
+emulation should probably show recently uploaded files in the "File Manager",
+as some uploaders apparently invoke WSO's "FilesMan" action in a second
+invocation after an upload to check that the file arrived correctly.
+</p>
+<p>
+It will probably pay off to save any files that a remote user tries to upload
+to URLs ending in <kbd>7c334.php</kbd> or <kbd>7c34.php</kbd>. These are common
+names for a generalized backdoor that doesn't save anything to the filesystem.
+You'll also have to watch for name changes to keep up with this thing.
+</p>
+<p>
+It's possible that emulating theme editing adequately would trick
+attackers into downloading more malware. My honey pot did not emulate
+theme editing at all well, but attackers tried to edit themes anyway.
+</p>
+<div id="subheader"><h2>Observations</h2></div>
+<ul>
+	<li>Guessing passwords is important enough to create password-guessing distributed computations.</li>
+	<li>Code makes multiple attempts at error-prone or tricky operations before treating that operation as failed.</li>
+	<li>Code accomodates execution on multiple versions of PHP, and usually Windows and Linux.</li>
+	<li>Crippling bugs and non-working order of operations abound.</li>
+	<li>Some attackers do <em>not</em> want their code to appear in files.</li>
+	<li>Knowledge of working user IDs and passwords, and successfully installed malware is passed around or sold.</li>
+</ul>
+<div id="subheader"><h2>Summary</h2></div>
+<p>
+Access to WordPress is obtained not by hacking or exploits, but rather
+by guessing the admin user's password. Single machine and apparently
+coordinated multi-machine guessing attacks happen.
+Some password guessing programs appear to be poorly written and buggy,
+others exist that try an exploit immediately upon logging in.
+My WordPress login emulation allowed in any user ID/password combination
+as an admin user, which may have discouraged the use of exploits.
+</p>
+<p>
+Registered users do all new post spam. All spam is about
+some given topic, but the keywords and hyperlinks are not related.
+A variety of hyperlinks appear in spams.
+</p>
+<p>
+The WSO web shell gets installed various ways, and then used to upload
+more pieces of malware. WSO web shells don't usually get used interactively,
+but rather by programs. Many versions of WSO are in current service.
+Folks try to obscure or camoflage WSO in many different ways.
+</p>
+<p>
+People upload email spam tools, file retrieval gateways, generalized 
+back doors and reconnaissance tools. On occasion, the IP address that
+guessed the password does not install any of the malware. Invocation of
+the malware can come months after install.
+</p>
+<p>
+The generalized backdoor gets used to run email spamming tools slightly
+customized to just do SMTP function checking, a specialized use of
+general tools to do reconnaissance. I didn't rapidy analyze
+and emulate downloaded malware, so any SMTP testing failed. It's possible
+that additional spamming did not take place because the tests failed.
+</p>
+<p>
+Most WordPress malware appears to be Linux-specific, or at least
+always chooses Linux-specific alternatives when OS-independent PHP APIs
+fail to work.  Sometimes malware includes its own version of functions
+that are now part of PHP itself. Malware often tries several alternatives
+for functions like sending email. These appear to be coding for robustness
+in the face of many different versions of PHP in the wild.
+</p>
+<p>
+Either the malware or the hosts it runs on aren't very
+reliable. Risky operations often get tried at least twice without
+the malware code treating API failures or HTTP 404 errors as real
+exceptional conditions.
+Attackers appear to use code without understanding it, which can lead
+to situations where attackers perform actions that will never succeed,
+or tasks get performed in a repetitious, inobvious and inefficient manner.
+</p>
+</div>
+</div>
+
+<div id="navigation">
+<div id="subheader"><h2>Sections</h2></div>
+<ul>
+	<li>Introduction</li>
+	<li><a href="details.html">Honey Pot Details</a></li>
+	<li><a href="access.html">Obtaining Access</a></li>
+	<li><a href="comment_spam.html">Spam Posts</a></li>
+	<li><a href="wso.html">WSO Web Shell</a></li>
+	<li><a href="login.html">WSO Session Example</a></li>
+	<li><a href="emailers.html">Email Spam Tools</a></li>
+	<li><a href="recon.html">Reconnaissance Tools</a></li>
+	<li><a href="gateway.html">File Retrieval Gateway</a></li>
+	<li><a href="testm.html">Obfuscated Code Champion</a></li>
+	<li><a href="backdoors.html">Back Doors</a></li>
+</ul>
+</div>
+
+<div id="extra">
+<div id="subheader"><h2>Author</h2></div>
+<p>
+<a href="mailto:bediger@stratigery.com">Bruce Ediger</a>, October, 2013.
+</p>
+<div id="subheader"><h2>References</h2></div>
+<p>
+<a href="https://code.google.com/p/web-malware-collection/">Collection of mostly PHP web malware</a>.
+</p>
+<p>
+<a href="http://www.webroot.com/blog/2011/02/22/malicious-php-scripts-on-the-rise/">Overview of PHP malware from 2011</a>.
+This overview has malware dropped in exclusively via FTP, using cracked/snooped/guess passwords.
+The same types of programs appear: email spamming programs, web shells.  The author mentions botnet
+scripts as the most common PHP malware.  I did not see any of those.
+</p>
+<p>
+<a href="https://www.sans.org/reading-room/whitepapers/malicious/introduction-linux-based-malware-36097">An Introduction to Linux-based Malware</a>.
+By having a packet capture of a WordPress site on Apache, the author captured a number of Linux-specific malware samples.
+</p>
+<p>
+<a href="https://github.com/bediger4000/php-malware-analysis">Deobfuscation and analysis of PHP malware</a> captured by my follow-on honey pot.
+The same themes show up: spamming tools, recon, access verification, backdoors and web shells, mostly WSO.
+I also get a number of SOCKS servers, native Perl, native PHP and compiled.
+</p>
+</div>
+<div id="footer"><p>Up to Bruce Ediger's <a style="color:white;" href="/">Web pages</a>.</p></div>
+</div>
+</body>
+</html>

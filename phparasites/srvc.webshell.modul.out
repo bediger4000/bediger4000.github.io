@@ -1,0 +1,2 @@
+a:16:{s:2:"os";s:5:"Linux";s:9:"osversion";s:75:"Linux ishmael 3.9.9-1-ARCH #1 SMP PREEMPT Wed Jul 3 22:52:05 CEST 2013 i686";s:9:"webserver";s:6:"Apache";s:8:"safemode";i:0;s:17:"disable_functions";s:0:"";s:4:"curl";i:1;s:7:"php_api";s:3:"cli";s:11:"php_version";s:6:"5.4.17";s:7:"basedir";s:4:"none";s:9:"timelimit";i:1;s:9:"userabort";i:1;s:6:"socket";i:1;s:11:"is_evalable";i:1;s:11:"is_execable";i:1;s:11:"is_mailable";s:7:"unknown";s:12:"sendmail_cmd";s:13:"[PHP] mail();";}
+

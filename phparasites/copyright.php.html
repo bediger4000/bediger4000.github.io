@@ -1,0 +1,343 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta name="google-site-verification" content="ixC4wtdetOlWNosRSwl6CFgRutGwfbq_9r9z534uRkY" />
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+<title>&#73;&#110;&#100;&#101;&#120;&#32;&#70;&#117;&#108;&#108;&#32;&#51;&#46;&#53;&#45;&#105;&#110;&#115;&#101;&#99;&#46;&#50;&#32;&#98;&#121;&#32;&#71;&#104;&#111;&#115;&#116;&#120;&#32;&#60;&#103;&#104;&#111;&#115;&#116;&#120;&#50;&#48;&#50;&#48;&#32;&#97;&#116;&#32;&#121;&#97;&#104;&#111;&#111;&#32;&#100;&#111;&#116;&#32;&#99;&#111;&#109;&#62;</title>
+<style>
+body
+{
+	font-family: Verdana, Arial;
+	font-size: 12px;
+	background-color:#333333;
+	color: white;
+}
+
+h1
+{ 
+color:#00FF00; 
+}
+
+input, select, textarea
+{
+	color:white;
+	border: 1px solid white;
+	background: black;
+	font-family:Verdana, Arial;
+	font-size: 11px;
+	width: 200px;
+	-moz-opacity:0.7;
+}
+
+textarea
+{
+	width: 400px;
+}
+
+label, input[type=radio]
+{
+	cursor: pointer;
+}
+
+input[type="file"]
+{
+	width: 400px;
+}
+
+input[type=button], input[type=submit], input[type=reset]
+{
+	width: 150px;
+	border: 2px outset #00FF00;
+	font-weight: bold;
+}
+
+input[type=button]:hover, input[type=submit]:hover, input[type=reset]:hover
+{
+	background-color: rgb(20,20,20);
+}
+
+input:hover, input:focus, select:hover, select:focus, textarea:focus, textarea:hover, .input_hover
+{
+	color: #00FF00;
+	/*background-color: rgb(20,20,20);*/
+	-moz-opacity:1;
+}
+
+input:focus, select:focus, textarea:focus, .input_focus
+{
+	border: 1px solid #00FF00;
+	-moz-opacity:1;
+}
+
+.error
+{
+	color:red;
+}
+
+.comment
+{
+	font-style:italic;
+	color: #cccccc;
+	text-decoration: blink;
+}
+
+.report
+{
+	font-family: Courier, monospace;
+}
+
+.reportOk
+{
+	color: #00FF00;
+}
+
+.reportErr
+{
+	color: red;
+}
+
+.h2green
+{
+	color: #00FF00;
+	margin-bottom: 2px;
+}
+
+#autoScrollBox
+{
+	color: black;
+	background-color: #00FF00;
+	border: 2px solid green;
+	position:fixed; 
+	bottom:5px; 
+	right:5px;
+	/*width:150px; 
+	height:100px;*/
+	-moz-opacity:0.5;
+}
+
+#autoScrollBox:hover
+{
+	-moz-opacity:1;
+}
+
+div.autoScrollSwitcher
+{
+	font-weight:bold;
+	text-align:center;
+}
+
+input.autoScrollSwitcher
+{
+	cursor: pointer;
+}
+</style>
+</head>
+<body>
+
+<h1>&#80;&#111;&#115;&#116;&#77;&#97;&#110;&#32;&#70;&#117;&#108;&#108;&#32;&#51;&#46;&#53;&#45;&#105;&#110;&#115;&#101;&#99;</h1>
+<h2>&#98;&#121;&#32;&#71;&#104;&#111;&#115;&#116;&#120;&#32;&#45;&#32;&#84;&#104;&#101;&#32;&#66;&#101;&#115;&#116;&#32;&#77;&#97;&#105;&#108;&#101;&#114;&#32;&#83;&#101;&#108;&#108;&#101;&#114;&#32;&#45;&#32;&#89;&#97;&#104;&#111;&#111;&#32;&#77;&#101;&#115;&#115;&#101;&#110;&#103;&#101;&#114;&#32;&#58;&#32;&#103;&#104;&#111;&#115;&#116;&#120;&#50;&#48;&#50;&#48;&#64;&#121;&#97;&#104;&#111;&#111;&#46;&#99;&#111;&#109;</h2>
+<form action="/phparasites/823491.capture.php" method="post" enctype="multipart/form-data" name="pmForm" id="pmForm" >
+<input type="hidden" name="formSubmited" value="submited" />
+  <table width="100%" border="0" cellspacing="2" cellpadding="2">
+    <tr>
+      <td>&nbsp;</td>
+      <td><input name="topSubmit" type="submit" id="topSubmit" value="Submit" /> <input name="topReset" type="reset" id="topReset" value="Reset" />
+      <input name="topClear" type="button" id="topClear" value="Clear All" onclick="clearAll();" /></td>
+    </tr>
+    <tr>
+      <td><b>Script Password</b></td>
+      <td>
+      	<input style="border-width:2px; font-weight:bold;" name="scriptPassword" type="text" id="scriptPassword" value="oi" />
+      	      </td>
+    </tr>
+    <tr>
+      <td>&nbsp;</td>
+      <td>&nbsp;</td>
+    </tr>
+    <tr>
+      <td><b>Basic Configuration</b> </td>
+      <td>&nbsp;</td>
+    </tr>
+    <tr>
+      <td width="20%">Method</td>
+      <td width="79%">
+        <select name="basicMethod" id="basicMethod" onchange="showHideSMTPConfig()">
+          <option value="smtp" >SMTP</option>
+          <option value="mail" selected="selected">PHP Mail()</option>
+          <option value="sendmail" disabled="disabled">Bin SendMail (off)</option>
+          <option value="qmail" disabled="disabled">Bin QMail (off)</option>
+        </select>      </td>
+    </tr>
+    <tr id="smtpConfigRow1">
+      <td>SMTP Server</td>
+      <td>
+      	<input name="smtpServer" type="text" id="smtpServer" value="smtp.hughes.net" /> 
+      	      </td>
+    </tr>
+    <tr id="smtpConfigRow2">
+      <td>SMTP Username</td>
+      <td>
+      	<input name="smtpUsername" type="text" id="smtpUsername" value="user@hughes.net" />
+      	      </td>
+    </tr>
+    <tr id="smtpConfigRow3">
+      <td>SMTP Password </td>
+      <td>
+      	<input name="smtpPassword" type="text" id="smtpPassword" value="password" />
+      	      </td>
+    </tr>
+      <tr id="smtpConfigRow4">
+      <td>SMTP Reconnect Every </td>
+      <td>
+      	<input name="smtpReconnectAfter" type="text" id="smtpReconnectAfter" value="6" /> sent emails
+      	      </td>
+    </tr>
+     <tr>
+      <td>Auto-scroll page</td>
+      <td><label>
+        <input name="autoscrollPage" id="doAutoScroll" type="radio" value="yes" style="width:20px;" checked="checked" />
+        Yes</label>
+          <label>
+            <input name="autoscrollPage" type="radio" value="no" style="width:20px;"  />
+            No</label>
+	   </td>
+    </tr>
+    <tr>
+      <td>&nbsp;</td>
+      <td>&nbsp;</td>
+    </tr>
+    <tr>
+      <td><b>Email Options</b> </td>
+      <td>&nbsp;</td>
+    </tr>
+    <tr>
+      <td>From Email </td>
+      <td>
+      	<input name="fromEmail" type="text" id="fromEmail" value="shelly.thomposon3087@hotmail.com" />
+      	      </td>
+    </tr>
+    <tr>
+      <td>From Name </td>
+      <td>
+      	<input name="fromName" type="text" id="fromName" value="Shelly Thompson" />
+      	      </td>
+    </tr>
+    <tr>
+      <td>Email Subject </td>
+      <td>
+      	<input name="subject" type="text" id="subject" value="June News" />
+      	      </td>
+    </tr>
+     <tr title="To change Message-Id header from message, add a hidden string on html messages">
+      <td>Add Random String</td>
+      <td><label>
+        <input name="addRandomString" id="addRandomString" type="radio" value="yes" style="width:20px;" checked="checked" />
+        Yes</label>
+          <label>
+            <input name="addRandomString" type="radio" value="no" style="width:20px;"  />
+            No</label>
+	   </td>
+  </tr>
+    <tr title="Try to generate a multipart email, containing plain/text and html"/>
+      <td>Multipart Email (html+text) </td>
+      <td><label>
+        <input name="multipartMail" type="radio" value="yes" style="width:20px;"  />
+        Yes</label>
+          <label>
+            <input name="multipartMail" type="radio" value="no" style="width:20px;" checked="checked" />
+            No</label>
+            	   </td>
+    </tr>
+    <tr>
+      <td>&nbsp;</td>
+      <td>&nbsp;</td>
+    </tr>
+    <tr>
+      <td><b>List Options</b></td>
+      <td>&nbsp;</td>
+    </tr>
+    <tr>
+      <td>List Method </td>
+      <td><select name="listMethod" id="listMethod" onchange="showHideListConfig()">
+        <option value="url" >URL</option>
+        <option value="textarea" selected="selected">Textarea</option>
+        <option value="file" >File Upload</option>
+		</select>
+				</td>
+    </tr>
+    <tr id="listConfigRow1">
+      <td>List Url </td>
+      <td>
+      	<input name="listUrl" type="text" id="listUrl" value="http://" />
+      	      </td>
+    </tr>
+    <tr id="listConfigRow2">
+      <td>List Textarea </td>
+      <td>
+	      <textarea name="listTextarea" cols="50" rows="10" id="listTextarea" onkeyup="listTextareaCount();"></textarea>
+		  <div id="listTextareaCounter"></div>
+		  	  </td>
+    </tr>
+    <tr id="listConfigRow3">
+      <td>List Upload File </td>
+      <td>
+      	<input name="listFile" type="file" id="listFile" style="width: 400px;" />
+      	      </td>
+    </tr>
+     <tr>
+      <td>List Starting Email</td>
+      <td>
+      	<input name="listStartingEmail" type="text" id="listStartingEmail" style="width: 400px;" value="1"/>
+      	      </td>
+    </tr>
+    <tr>
+      <td>&nbsp;</td>
+      <td>&nbsp;</td>
+    </tr>
+      <td><b>Message Options</b></td>
+      <td>&nbsp;</td>
+    </tr>
+    <tr>
+      <td>Message Method </td>
+      <td>
+      	<select name="messageMethod" id="messageMethod" onchange="showHideMessageConfig()">
+        <option value="url" >URL</option>
+        <option value="textarea" selected="selected">Textarea</option>
+        <option value="file" >File Upload</option>
+		</select>		
+			</td>
+    </tr>
+    <tr id="messageConfigRow1">
+      <td>Message Url </td>
+      <td>
+      	<input name="messageUrl" type="text" id="messageUrl" value="http://" />
+      	      </td>
+    </tr>
+    <tr id="messageConfigRow2">
+      <td>Message Textarea </td>
+      <td>
+      	<textarea name="messageTextarea" cols="50" rows="10" id="messageTextarea" onkeyup="messageTextareaCount();"></textarea>
+	  	<div id="messageTextareaCounter"></div>
+	  		  </td>
+    </tr>
+    <tr id="messageConfigRow3">
+      <td>Message Upload File </td>
+      <td>
+      	<input name="messageFile" type="file" id="messageFile" style="width: 400px;" />
+      	      </td>
+    </tr>
+    <tr>
+      <td>&nbsp;</td>
+      <td>&nbsp;</td>
+    </tr>
+    <tr>
+      <td>&nbsp;</td>
+      <td><input name="bottomSubmit" type="submit" id="bottomSubmit" value="Submit" />
+          <input name="bottomReset" type="reset" id="bottomReset" value="Reset" />
+          <input name="bottomClear" type="button" id="bottomClear" value="Clear All" onclick="clearAll();"/></td>
+    </tr>
+  </table>
+</form>
+</body>
+</html>

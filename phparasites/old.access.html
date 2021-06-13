@@ -1,0 +1,183 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+<head>
+<title>PHParasites:  WordPress Malware</title>
+<meta http-equiv="content-type" content="text/html; charset=utf-8">
+<style type="text/css">
+html,body{margin:0;padding:0}
+body{font: 76% arial,sans-serif}
+p{margin:0 10px 10px}
+div#header h1{height:80px;line-height:80px;margin:0; padding-left:10px;background: #EEE;color: #79B30B}
+div#subheader h2{height:15px;line-height:15px;margin:5px; padding-left:10px;color: #79B30B}
+div#subsubheader h3{height:10px;line-height:10px;margin:5px; padding-left:12px;color: #79B30B}
+div#content p{line-height:1.4}
+div#navigation{background:#B9CAFF}
+div#extra{background:#FF8539}
+div#footer{background: #333;color: #FFF}
+div#footer p{margin:0;padding:5px 10px}
+div#wrapper{float:left;width:100%}
+div#content{margin: 0 25%}
+div#navigation{float:left;width:25%;margin-left:-100%}
+div#extra{float:left;width:25%;margin-left:-25%}
+div#footer{clear:left;width:100%}
+</style>
+</head>
+<body>
+<div id="container">
+<div id="header">
+	<h1>PHParasites:  WordPress Malware</h1>
+</div>
+<div id="wrapper">
+<div id="content">
+<div id="subheader"><h2>Obtaining Access</h2></div>
+<p>
+Access to WordPress administration happens solely by automated
+username and password guessing.
+--> Nobody used any WordPress exploits that I could detect.
+</p>
+<p>
+Does any of this quantitative stuff make sense in light of letting
+any user ID/password combo come in? Except maybe as an example of how
+stupid the password guessers are.
+</p>
+<p>
+Any evidence of someone guessing a weird password, and then coming back
+as a human to try it out?
+Also, scrounge up the access_log records of attempted exploits.
+</p>
+<p>
+The programs used weren't terribly smart.
+Some of the guessing probably doesn't work on real WordPress installations,
+due to WordPress looking for certain cookies
+on login attempts. At least some of the automated guessers don't
+put appropriate cookies in their guess requests.
+The guessers typically keep on guessing even after getting a successful
+login, which amounts to a redirect to <kbd>wp-admin/</kbd>.
+</p>
+<p>
+One guess contained a <a href="long.password">5,105 character-long "password string"</a>
+that's apparently a concatenation of all the passwords loaded into that guesser.
+The "password string" came from 202.179.22.211, which <kbd>p0f</kbd> 
+says was running "Windows 2000 SP4, XP SP1+, 2003".
+Nothing in <kbd>$_SERVER</kbd> and <kbd>$_REQUEST</kbd> for that guess
+looks particularly unique.  I have to believe that either someone
+botched the format of the candidate password file, or it was a particularly
+ineptly written guesser.
+</p>
+<p>
+After I shut down the honey pot, my web server sill
+suffered through long sessions of guessing that just got 404s.
+The password guessing code doesn't even bother to check the HTTP response.
+</p>
+<!--
+<p>
+A security researcher named 'afterm4th' sent me 
+brutres.txt - what about this? 758 or so passwords from an (the?) instance
+of the "Fort Disco" botnet.
+</p>
+-->
+<p>
+During the 2013-03-09 10,001 attempt guessing session, my server
+was not even running a WordPress honey pot, just a small PHP program
+invoked by <kbd>wp-login.php</kbd> URLs. This small program captured
+values of <kbd>$_REQUEST</kbd>, <kbd>$_SERVER</kbd> and <kbd>$_COOKIE</kbd>
+superglobals.
+</p>
+<a name="LOGINSPERDAY"><img src="wp_login.daily.count.png" alt="WordPress Login Attempts per day" /></a>
+<div id="subsubheader"><h3>Single Machine Guessing Sessions</h3></div>
+<p>
+The graph shows some lengthy single machine guessing sessions:
+on 2012-12-29, 78.46.98.123 made 3155 login attemts between 
+17:34:52-07 and 23:09:24-07.
+I made mistakes collecting <kbd>$_REQUEST</kbd>, capturing only
+41 passwords during this period. <kbd>p0f</kbd> says that 78.46.98.123
+was a Linux machine (Linux 2.6 (newer, 3) or Mac OSX 10.3.1 (possibly FC 6, CentOS 5.x))
+during this period.
+The user agent read "Mozilla/5.0 (X11; U; Linux i686; pt-BR; rv:1.9.0.15) Gecko/2009102815 Ubuntu/9.04 (jaunty) Firefox/3.0.15",
+apparently a user agent string used by real web browsers.
+</p>
+<img src="wp_login-2013-03-09.count.png" alt="WordPress Login Attempts per minute, 2013-03-09" />
+<p>
+On 2013-03-09, 10001 login attempts, all from 178.151.216.53.
+178.151.216.53 a Windows Vista or Windows 7 SP1 machine during
+this period, used HTTP 1.1 <kbd>Connection: Keep-alive</kbd> headers.
+It used a single TCP connection for each 101 requests.
+It made about 140 requests per minute.
+</p>
+<p>
+It used an almost alphabetical list of passwords when guessing.
+</p>
+<div id="subsubheader"><h3>Multi-Machine Guessing Session</h3></div>
+<p>
+Some seemingly coordinated multi-machine guessing sessions occurred.
+</p>
+<img src="wp_login.daily.ip.png" alt="Unique IP addresses making WordPress Login Attempts per day" />
+<p>
+The time scale for this graph and the <a href="#LOGINSPERDAY">logins-per-day graph above</a>
+("Daily WordPress Login Counts") should be identical. Between the two, they demonstrate that different techniques
+get used.
+</p>
+<img src="wp_login-2013-06-26.count.png" alt="WordPress Login Attempts per minute" />
+<p>
+</p>
+<p>
+2013-07-14, 9051 requests, 137 IP address making 
+Almost all IP addresses identified as  Windows XP, Vista or Windows 7 by
+<kbd>p0f</kbd>.
+</p>
+<p>
+2013-08-03 - 2013-08-04 4283 requests, 530 IP address making at
+least 3 requests each. Almost all Windows XP, Vista or Windows 7,
+various SP levels. The user agent string read " Mozilla/5.0 (Windows NT 5.1; rv:11.0) Gecko Firefox/11.0".
+</p>
+<div id="subsubheader"><h3>Password Analysis</h3></div>
+<p>
+2013-03-09 single machine session used an
+<a href="">almost alphabetical list of passwords</a>.
+The same IP address used a non-alphabetical list of about 50 passwords
+twice, once 2013-06-28 and once on 2013-06-29.
+</p>
+</div>
+</div>
+
+<div id="navigation">
+<div id="subheader"><h2>Sections</h2></div>
+<ul>
+	<li><a href="index.html">Introduction</a>.</li>
+	<li><a href="details.html">Honey Pot Details</a></li>
+	<li>Obtaining Access</li>
+	<li><a href="comment_spam.html">Comment Spam</a></li>
+	<li><a href="wso.html">WSO Web Shell</a></li>
+	<li><a href="login.html">WSO Session Example</a></li>
+	<li><a href="emailers.html">Email Spam Tools</a></li>
+	<li><a href="recon.html">Reconnaissance Tools</a></li>
+	<li><a href="gateway.html">File Retrieval Gateway</a></li>
+	<li><a href="testm.html">Obfuscated Code Champion</a></li>
+	<li><a href="backdoors.html">Back Doors</a></li>
+</ul>
+</div>
+
+<div id="extra">
+<div id="subheader"><h2>Author</h2></div>
+<p>
+<a href="mailto:bediger@stratigery.com">Bruce Ediger</a>, October, 2013.
+</p>
+<div id="subheader"><h2>Passwords</h2></div>
+<p>
+<a href="wp_login.all.passwords.dat">All passwords</a>, with timestamp and source IP address.
+</p>
+<p>
+<a href="2013-06-26.passwords.txt">2013-06-26 multi-machine guessed passwords</a>.
+</p>
+<div id="subheader"><h2>References</h2></div>
+<p>
+<a href="http://blog.sucuri.net/2013/04/the-wordpress-brute-force-attack-timeline.html">A security blog on WordPress guessing attacks</a>.
+The <a href="http://pastebin.com/raw.php?i=UTUsmPm6">guessed password list</a>
+looks awfully familiar, particularly the weird random strings like "cgfhnfr"
+and "cjkysirj", which also appear in my guessed password list.
+</p>
+</div>
+<div id="footer"><p>Up to Bruce Ediger's <a style="color:white;" href="/">Web pages</a>.</p></div>
+</div>
+</body>
+</html>

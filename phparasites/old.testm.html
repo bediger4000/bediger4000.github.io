@@ -1,0 +1,154 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+<head>
+<title>PHParasites:  WordPress Malware</title>
+<meta http-equiv="content-type" content="text/html; charset=utf-8">
+<style type="text/css">
+html,body{margin:0;padding:0}
+body{font: 76% arial,sans-serif}
+p{margin:0 10px 10px}
+div#header h1{height:80px;line-height:80px;margin:0; padding-left:10px;background: #EEE;color: #79B30B}
+div#subheader h2{height:15px;line-height:15px;margin:5px; padding-left:10px;color: #79B30B}
+div#content p{line-height:1.4}
+div#navigation{background:#B9CAFF}
+div#extra{background:#FF8539}
+div#footer{background: #333;color: #FFF}
+div#footer p{margin:0;padding:5px 10px}
+div#wrapper{float:left;width:100%}
+div#content{margin: 0 25%}
+div#navigation{float:left;width:25%;margin-left:-100%}
+div#extra{float:left;width:25%;margin-left:-25%}
+div#footer{clear:left;width:100%}
+</style>
+</head>
+<body>
+<div id="container">
+<div id="header">
+	<h1>PHParasites:  WordPress Malware</h1>
+</div>
+<div id="wrapper">
+<div id="content">
+<div id="subheader"><h2>testm.php</h2></div>
+<p>
+This is my favorite method of obfuscation. The ultimate <kbd>testm.php</kbd>
+program is nothing special, but it's just so cute, the way the writer
+tried to cover it all up.
+</p>
+<p>
+Someone downloaded <kbd>testm.php</kbd> via the "uploadFile" action of (what
+they believed was) a previously uploaded <a href="wso.php">WSO web shell</a>. I
+don't understand why you'd use a program designed as an interactive user
+interface to do automated file download, but that's how the criminal's code
+'em.
+</p>
+<p>
+After only two seconds, the IP address that sent <kbd>testm.php</kbd>
+tried to run it. <kbd>testm.php</kbd> turns out to be a reconnaisance
+program, basically checking if the machine it's downloaded on can
+send email to <kbd>tstmal@uymail.ru</kbd> via the PHP 
+<a href="http://php.net/manual/en/function.mail.php"><kbd>mail()</kbd></a> function.
+</p>
+<div id="subheader"><h2>Obfuscation</h2></div>
+<p>
+<kbd>testm.php</kbd> starts out as a single, 2007 character ASCII string.
+1273 characters of that string are some oddly coded PHP. 
+The other 734 characters of the string appear to be more-or-less
+random ASCII gibberish.
+</p>
+<p>
+The code
+starts by defining a string: <kbd>$OOO000000='fg6sbehpra4co_tnd';</kbd>.
+That string is urlencoded, so it gets <a href="http://us2.php.net/manual/en/function.urldecode.php">urldecoded</a>.
+</p>
+<p>
+It constructs strings by referencing <kbd>$OOO000000</kbd> one character at
+a time: 
+</p>
+<ul>
+	<li><kbd>"base64_decode"</kbd></li>
+	<li><kbd>"fopen"</kbd></li>
+	<li><kbd>"fgets"</kbd></li>
+	<li><kbd>"fread"</kbd></li>
+	<li><kbd>"strtr"</kbd></li>
+</ul>
+<p>
+Sometimes the code gets cute and uses a character from a previously-constructed
+string, instead of getting that same characger from <kbd>$OOO000000</kbd>.
+Only the variable that holds "base64_decode" gets used in the plaintext,
+highly obfuscated code.
+</p>
+<p>
+After composing the strings, the PHP calls
+</p>
+<pre>eval($GLOBALS['OOO0000O0']('JE8wM....');</pre>
+<p>
+<kbd>$GLOBALS['OOO0000O0']</kbd> is the variable that conveniantly holds
+the string "base64_decode". That's a long way to go to get to the usual
+sort of <kbd>eval(base64_decode(<em>amazigly long string</em>))</kbd>
+mechanism that gets malware code executed.  Especially since the <kbd>eval()</kbd>
+is in plain text. An <kbd>eval</kbd> is a lot more suspcious to my mind
+than a call to <kbd>base64_decode()</kbd>.
+</p>
+<p>
+The amazingly long string of gibberish ends up base64_decoding to
+(formatted for a little clarity):
+</p>
+<pre><kbd>
+$O000O0O00=$GLOBALS['OOO000O00']($OOO0O0O00,'rb');
+$GLOBALS['O0O00OO00']($O000O0O00,0x4fb);
+$OO00O00O0=$GLOBALS['OOO0000O0'](
+	$GLOBALS['OOO00000O'](
+		$GLOBALS['O0O00OO00']($O000O0O00,0x1a8),
+		'QYqgd7emER8otKG5P+FcaU1nZsV/lJH0xwIOkS43vANLjryuiWzXhCfpTDMBb269=',
+		'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/'
+	)
+);
+eval($OO00O00O0);
+</kbd></pre>
+<p>
+I see what it did there: it used the strings it composed in the
+plaintext PHP, and stored in ugly-named variables.
+<kbd>$GLOBALS['OOO000O00']</kbd> evaluates to "fopen".
+<kbd>$GLOBALS['O0O00OO00']</kbd> evaluates to "fread".
+It uses the PHP <kbd>fread()</kbd> function to read 0x4FB, or 1275,
+bytes of the file <kbd>testm.php</kbd>.  That means any further reads
+of the file will be from the long string of ASCII gibberish that
+follows the "?>" at the end of the plaintext, obfuscated PHP.
+</p>
+<p>
+The code then reads 0x1A8 (424) bytes of the ASCII gibberish,
+runs it through a <a href="http://en.wikipedia.org/wiki/Caesar_cipher">Caesar cipher</a>, and base64_decodes the deciphered text.
+It puts the base64_decoded text into <kbd>eval()</kbd>.
+</p>
+<p>
+</p>
+</div>
+</div>
+
+<div id="navigation">
+<div id="subheader"><h2>Sections</h2></div>
+<ul>
+	<li><a href="index.html">Introduction</a></li>
+	<li><a href="access.html">Obtaining Access</a></li>
+	<li><a href="comment_spam.html">Comment Spam</a></li>
+	<li><a href="wso.html">WSO Web Shell</a></li>
+	<li><a href="other_shell.html">Other Web Shell</a></li>
+	<li><a href="emailers.html">Email spam tools</a></li>
+	<li><a href="recon.html">Reconnaissance tools</a></li>
+	<li><a href="gateway.html">File retrieval gateway</a></li>
+	<li><a href="backdoors.html">Back Doors</a></li>
+</ul>
+</div>
+
+<div id="extra">
+<div id="subheader"><h2>Author</h2></div>
+<p>
+<a href="mailto:bediger@stratigery.com">Bruce Ediger</a>, October, 2013.
+</p>
+<p>
+</p>
+</div>
+<div id="footer"><p>Up to Bruce Ediger's <a style="color:white;" href="/">Web pages</a>.</p></div>
+</div>
+</body>
+</html>

@@ -1,0 +1,248 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+<head>
+<title>PHParasites:  WordPress Malware</title>
+<meta http-equiv="content-type" content="text/html; charset=utf-8">
+<meta name="google-site-verification" content="ixC4wtdetOlWNosRSwl6CFgRutGwfbq_9r9z534uRkY" />
+<style type="text/css">
+html,body{margin:0;padding:0}
+body{font: 76% arial,sans-serif}
+p{margin:0 10px 10px}
+div#header h1{height:80px;line-height:80px;margin:0; padding-left:10px;background: #EEE;color: #79B30B}
+div#subheader h2{height:15px;line-height:15px;margin:5px; padding-left:10px;color: #79B30B}
+div#subsubheader h3{height:10px;line-height:10px;margin:5px; padding-left:12px;color: #79B30B}
+div#content p{line-height:1.4}
+div#content pre{line-height:1.4;margin:5px;font:100% courier;}
+div#content table{margin:10px;}
+div#content kbd{font:100% courier;}
+div#navigation{background:#B9CAFF}
+div#extra{background:#FF8539}
+div#footer{background: #333;color: #FFF}
+div#footer p{margin:0;padding:5px 10px}
+div#wrapper{float:left;width:100%}
+div#content{margin: 0 25%}
+div#navigation{float:left;width:25%;margin-left:-100%}
+div#extra{float:left;width:25%;margin-left:-25%}
+div#footer{clear:left;width:100%}
+</style>
+</head>
+<body>
+<div id="container">
+<div id="header">
+	<h1>PHParasites:  WordPress Malware</h1>
+</div>
+<div id="wrapper">
+<div id="content">
+<div id="subheader"><h2>Spam Posts</h2></div>
+<div id="subsubheader"><h3>or <em>Hairloss Suggestions That Will Certainly Job</em></h3></div>
+<p>
+I included honey pot functions to mimic registering users, and functions to
+mimic uploading new posts.  This led to registered user IDs leaving obvious spam
+posts.  Spam posts got made by registered users only, no exploits were
+exercised to do spamming.
+</p>
+<div id="subsubheader"><h3>Registered Users</h3></div>
+<div id="subsubheader"><h3>or <em>Give Your Own Home With One Of These Guidelines</em></h3></div>
+<p>
+The HTTP POST made to register a user seems like an all-encompassing
+form, <a href="exotic.registration.txt">comprising 71 name/value pairs</a>.
+Some of the name/value pairs
+are just duplicates: the POST contains identical values for names
+<kbd>zip_code</kbd>,
+<kbd>zipcode</kbd>,
+<kbd>zip</kbd> and
+<kbd>postalzip_code</kbd>.
+The elaborate POST data also contains identical values for names
+<kbd>cimy_uef_wp_PASSWORD</kbd>,
+<kbd>cimy_uef_wp_PASSWORD2</kbd>,
+<kbd>pass1</kbd>,
+<kbd>pass2</kbd>,
+<kbd>pswd1</kbd>,
+<kbd>pswd2</kbd>,
+<kbd>user_pw1</kbd>,
+<kbd>user_pw2</kbd>,
+<kbd>user_pwd1</kbd>,
+<kbd>user_pwd2</kbd>,
+<kbd>password</kbd>,
+<kbd>confirm_password</kbd>,
+<kbd>user_password</kbd> and
+<kbd>user_confirm_password</kbd>.
+This POST data targets more than one registration form.
+I don't know enough about WordPress and its history to say if
+this duplicated entry form targets different versions of WordPress over the
+years, or it targets different CMS and blogging systems.
+</p>
+<table border="1">
+<tr>
+	<th>WordPress Login</th>
+	<th>WordPress Password</th>
+	<th>Email address</th>
+	<th>Time of registration</th>
+</tr>
+<!--
+<tr><td>stantonholland5086</td><td>Bxwovfsmi3</td><td>JackOrtal@bowlby.htsail.pl</td><td>2012-12-13 13:25:04-07</td></tr>
+<tr><td>cortezgray1621</td><td>Bxwovfsmi3</td><td></td><td>2013-05-25 11:14:14-06</td></tr>
+<tr><td>darringiles7075</td><td>Bxwovfsmi3</td><td>JackOrtal@bowlby.htsail.pl</td><td>2013-05-25 11:14:15-06</td></tr>
+<tr><td>ernestogates8473</td><td>Bxwovfsmi3</td><td>JackOrtal@bowlby.htsail.pl</td><td>2013-05-25 11:14:17-06</td></tr>
+<tr><td>franceslancaster3713</td><td>Bxwovfsmi3</td><td>JackOrtal@bowlby.htsail.pl</td><td>2013-05-25 11:52:07-06</td></tr>
+<tr><td>irvinharrison6741</td><td>Bxwovfsmi3</td><td>JackOrtal@bowlby.htsail.pl</td><td>2013-05-25 11:52:08-06</td></tr>
+<tr><td>jessjoyce8503</td><td>Bxwovfsmi3</td><td></td><td>2013-05-25 11:52:11-06</td></tr>
+<tr><td>richiebowman869</td><td>Bxwovfsmi3</td><td>JackOrtal@bowlby.htsail.pl</td><td>2013-05-25 12:47:53-06</td></tr>
+<tr><td>darrinwilson4117</td><td>Bxwovfsmi3</td><td>JackOrtal@bowlby.htsail.pl</td><td>2013-05-25 12:47:55-06</td></tr>
+<tr><td>alecgraham6432</td><td>Bxwovfsmi3</td><td>JackOrtal@bowlby.htsail.pl</td><td>2012-12-13 13:25:04-07</td></tr>
+<tr><td>antonebarber5746</td><td>Bxwovfsmi3</td><td>JackOrtal@bowlby.htsail.pl</td><td>2012-12-13 13:25:04-07</td></tr>
+<tr><td>tylerblake628</td><td>Bxwovfsmi3</td><td></td><td>2012-12-13 13:25:04-07</td></tr>
+Registration timestamps
+         tstmp          |       req_value       
+ 2013-05-25 11:14:15-06 | darringiles7075
+ 2013-05-25 11:14:17-06 | ernestogates8473
+ 2013-05-25 11:52:07-06 | franceslancaster3713
+ 2013-05-25 11:52:08-06 | irvinharrison6741
+ 2013-05-25 11:52:11-06 | jessjoyce8503
+ 2013-05-25 12:47:53-06 | richiebowman869
+ 2013-05-25 12:47:55-06 | darrinwilson4117
+ 2013-05-25 12:47:58-06 | alecgraham6432
+ 2013-05-28 01:04:32-06 | antonebarber5746
+ 2013-05-28 01:04:34-06 | tylerblake628
+ 2013-05-28 01:04:36-06 | irvingmcfarland3207
+ 2013-05-28 01:04:38-06 | pierrewoods158
+ 2013-05-28 01:04:40-06 | codyunderwood6905
+ 2013-05-30 02:00:56-06 | darronlangley6557
+ 2013-05-30 02:00:58-06 | margaritobowman3078
+ 2013-05-30 02:01:00-06 | antonecotton1894
+ 2013-05-30 02:01:02-06 | marianochristensen638
+ 2013-05-30 02:01:04-06 | irvingmorrow8196
+ 2013-06-01 16:47:38-06 | anibalsnider5838
+ 2013-06-27 06:10:57-06 | felipewaters3778
+ 2013-06-27 08:18:27-06 | Ksenia6v0
+ 2013-06-27 12:41:11-06 | Yaromyrbys
+ 2013-06-27 13:34:39-06 | Mecheslavtv9
+ 2013-06-27 15:15:05-06 | silascrawford750
+ 2013-08-24 08:19:33-06 | Ludmilla7ed
+-->
+<tr><td>anibalsnider5838</td><td align="center">Bxwovfsmi3</td><td>JackOrtal@bowlby.htsail.pl</td><td>2013-06-01T16:47:38-06</td></tr>
+<tr><td>felipewaters3778</td><td align="center">Qnwscwker2</td><td>fanatico@benevento.htsail.pl</td><td>2013-06-27T06:10:57-06</td></tr>
+<tr><td>silascrawford750</td><td align="center">Msxxkyeve2</td><td>jozek@giaccio.htsail.pl</td><td>2013-06-27T15:15:05-06</td></tr>
+<tr><td>rickyallison5579</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+</table>
+<p>I accidentally deleted registration data for user ID <kbd>rickyallison5579</kbd>.</p>
+<p>
+The email address "JackOrtal@bowlby.htsail.pl" registers lots of users on lots
+of blogs, as you can see by googling for that address.
+</p>
+<p>
+Someone used IP addresses 83.23.140.18, 79.186.131.128, 31.6.71.150 to register all of the WordPress users.
+All of these IP addresses belong to Polish ISPs.
+All 478 spam posts came from 31.6.71.150, between
+2013-06-10T01:13:49-06 and 2013-08-24T00:23:53-06
+</p>
+<table border="1">
+<tr>
+	<th>WordPress Login</th>
+	<th>Number of Posts</th>
+	<th>First Post</th>
+	<th>Last Post</th>
+</tr>
+<tr><td>anibalsnider5838</td><td align="center">53</td><td>2013-06-10T01:13:49-06</td><td>2013-06-27T11:51:50-06</td></tr>
+<tr><td>felipewaters3778</td><td align="center">1</td><td>2013-06-27T14:15:32-06</td><td></td></tr>
+<tr><td>silascrawford750</td><td align="center">385</td><td>2013-06-27T15:52:23-06</td><td>2013-07-09T13:11:01-06</td></tr>
+<tr><td>rickyallison5579</td><td align="center">39</td><td>2013-08-10T16:43:28-06</td><td>2013-08-24T00:23:53-06</td></tr>
+</table>
+<p>
+It certainly looks like the Polish Article Spammers set up their next user ID
+before having the previous ID post its final spam. I can't explain why
+"felipewaters3778" only made a single spam new post.
+</p>
+<div id="subsubheader"><h3>Spam Posting</h3></div>
+<div id="subsubheader"><h3>or <em>Appearance Here For Superb Advice With A Healthful Therapeutic massage</em></h3></div>
+<p>
+</p>
+<p>
+</p>
+<p>
+The articles get posted in one gigantic call to <kbd>/wp-admin/post.php</kbd>.
+That indicates that the posting is automated. Ordinary "new post" editing
+happens using <a href="http://www.tinymce.com/">TinyMCE</a>, an open source
+in-browser WYSIWYG HTML editor. TinyMCE makes lots of calls back to the
+WordPress server via an AJAX mechanism.  None of those AJAX calls occurred.
+Further, the HTTP POST to <kbd>/wp-admin/post.php</kbd> contains a lot of nearly
+identical name/value pairs. The HTTP POST contains names <kbd>post_title</kbd>,
+<kbd>title</kbd> and <kbd>aiosp_title</kbd>, all with the same value.
+It also contains names <kbd>post_tag</kbd>, <kbd>newtags</kbd> and <kbd>aiosp_keywords</kbd>
+also all sharing a lexically identical value. Just like the HTTP POST that registers
+new users, this POST seems designed to fill in many new-post forms.
+</p>
+<div id="subsubheader"><h3>Spam Characteristics</h3></div>
+<div id="subsubheader"><h3>or <em>Excellent Guideline Concerning How To Effectively Conquer Yeast Infection</em></h3></div>
+<p>
+</p>
+<p>
+</p>
+<p>
+The spam articles are all in English. The English in the spam is just slightly
+off, as if automatically translated from another language, or perhaps written
+by an intelligent, yet non-native English speaker.
+</p>
+<p>
+The HTML uses <a href="http://www.w3schools.com/html/html_entities.asp">entities</a> for some letters,
+in what's known as a <a href="http://shkspr.mobi/blog/2014/02/homoglyph-attacks/">homoglyph attack</a>.
+The entities are mostly English letters, but occasionally, a Cyrillic
+entity substitutes for a morphologically similar English letter (&amp;#1110; &rarr; і). This is
+similar to one variety of <a href="gateway.html">PHP obfuscation</a>, except
+that the goal appears to be visual, not lexical, equality.
+I have to wonder what the point of this obfuscation is. It would seem
+to be an attempt to eliminate the ability to grep for certain words, but
+the entities get used in non-specific words like "this".
+</p>
+<p>
+The text format of all spams is the same: one paragraph per very long line,
+CR-LF end-of-line marks (MS-DOS "text" format).
+Roughly 27-28 paragraphs (one per line) per spam.
+</p>
+<p>
+The pages linked-to in the spam have no relevance to the content of
+the spam. Most of the links seem to refer to payday loan web sites,
+but a huge variety of other websites get linked to.
+It's really hard to say if this is some misguided "SEO" attempts,
+or if the links lead to malware.  I didn't follow any of them.
+</p>
+</div>
+</div>
+
+<div id="navigation">
+<div id="subheader"><h2>Sections</h2></div>
+<ul>
+	<li><a href="index.html">Introduction</a>.</li>
+	<li><a href="details.html">Honey Pot Details</a></li>
+	<li><a href="access.html">Obtaining Access</a></li>
+	<li>Spam Posts</li>
+	<li><a href="wso.html">WSO Web Shell</a></li>
+	<li><a href="login.html">WSO Session Example</a></li>
+	<li><a href="emailers.html">Email Spam Tools</a></li>
+	<li><a href="recon.html">Reconnaissance Tools</a></li>
+	<li><a href="gateway.html">File Retrieval Gateway</a></li>
+	<li><a href="testm.html">Obfuscated Code Champion</a></li>
+	<li><a href="backdoors.html">Back Doors</a></li>
+</ul>
+</div>
+
+<div id="extra">
+<div id="subheader"><h2>Author</h2></div>
+<p>
+<a href="mailto:bediger@stratigery.com">Bruce Ediger</a>, October, 2013.
+</p>
+<div id="subheader"><h2>Supporting Data</h2></div>
+<p>
+<a href="comment.titles.txt">Spam articles' titles</a>.
+</p>
+<p>
+List of <a href="spam_urls.txt">Linked-to URLs</a> from spam articles, text format.
+</p>
+<p>
+<a href="spam_keywords.txt">Spam Post Keywords</a> from spam articles, text format.
+</p>
+</div>
+<div id="footer"><p>Up to Bruce Ediger's <a style="color:white;" href="/">Web pages</a>.</p></div>
+</div>
+</body>
+</html>

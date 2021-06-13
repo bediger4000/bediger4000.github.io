@@ -1,0 +1,178 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+<head>
+<title>PHParasites:  WordPress Malware</title>
+<meta name="google-site-verification" content="ixC4wtdetOlWNosRSwl6CFgRutGwfbq_9r9z534uRkY" />
+<meta http-equiv="content-type" content="text/html; charset=utf-8">
+<style type="text/css">
+html,body{margin:0;padding:0}
+body{font: 76% arial,sans-serif}
+p{margin:0 10px 10px}
+div#header h1{height:80px;line-height:80px;margin:0; padding-left:10px;background: #EEE;color: #79B30B}
+div#subheader h2{height:15px;line-height:15px;margin:5px; padding-left:10px;color: #79B30B}
+div#subsubheader h3{height:10px;line-height:10px;margin:5px; padding-left:12px;color: #79B30B}
+div#content p{line-height:1.4}
+div#content pre{line-height:1.4;margin:5px;font:100% courier;}
+div#content kbd{font:100% courier;}
+div#navigation{background:#B9CAFF}
+div#extra{background:#FF8539}
+div#footer{background: #333;color: #FFF}
+div#footer p{margin:0;padding:5px 10px}
+div#wrapper{float:left;width:100%}
+div#content{margin: 0 25%}
+div#navigation{float:left;width:25%;margin-left:-100%}
+div#extra{float:left;width:25%;margin-left:-25%}
+div#footer{clear:left;width:100%}
+</style>
+</head>
+<body>
+<div id="container">
+<div id="header">
+	<h1>PHParasites:  WordPress Malware</h1>
+</div>
+<div id="wrapper">
+<div id="content">
+<div id="subheader"><h2>Honey Pot Details</h2></div>
+<p>
+</p>
+<div id="subsubheader"><h3>Apache HTTP Server</h3></div>
+<p>
+I ran the honey pot with an Apache HTTP server. I used Apache's <a
+href=""><kbd>mod_rewrite</kbd></a> module to aid in spoofing requests for
+(emulated) blogs whose URI I couldn't know in advance, and also for spoofing
+requests for PHP files in plugins or themes that the fake blog had claimed to
+successfully install, but actually had just saved the zip file.
+</p>
+<p>
+I used an extended Apache log file format: <kbd>LogFormat "%h %l %u %t \"%r\" %>s %b \"%{Referer}i\" \"%{User-Agent}i\"" combined
+</kbd>. A typical line in <kbd>access_log</kbd> looks like this:
+</p>
+<pre><kbd>192.168.1.114 - - [08/Jul/2013:22:16:46 -0600] "GET / HTTP/1.1" 403 179 "-" "Mozilla/5.0 (X11; Linux i686; rv:22.0) Gecko/20100101 Firefox/22.0"
+</kbd></pre>
+<div id="subsubheader"><h3>p0f Passive Scanner</h3></div>
+<p>
+I ran <a href="http://lcamtuf.coredump.cx/p0f.tgz">p0f</a> v2.0,
+a passive identification daemon, on the same server.
+This allows OS guessing/identification on a basis other than
+the user agent string. A typical output line (one per SYN packet:
+</p>
+<pre><kbd>&lt;Thu Sep 26 21:26:15 2013&gt; 10.0.0.3:48234 - Linux 3.0-1 (1) (possibly Ubuntu 11.10, FC 16, Gentoo 11.2, OpenSUSE 12.x) (up: 247 hrs) -> 89.187.142.144:80 (distance 0, link: ethernet/modem)
+</kbd></pre>
+<p>
+p0f v3  became available shortly after I started using p0f v2, but i like
+the single-line format of p0f v2's output. I used
+<a href="https://tools.netsa.cert.org/confluence/display/tt/p0f+fingerprints">fingerprint file p0f.fp.2012032901</a>.
+</p>
+<div id="subsubheader"><h3>Database</h3></div>
+<p>
+I used a <a href="http://www.postgresql.org/">Postgresql</a> database to select and coordinate
+<kbd>access_log</kbd> entries, <kbd>p0f</kbd> observations and what
+information the WordPress blog emulation logged. It has a "star schema" layout, with 
+three fact tables, and a number of supporting dimension tables.
+</p>
+<p>
+It is pssible to match <kbd>p0f</kbd> OS identifications to Apache log
+file entries, so my <a href="dbdesign.html">database design</a> does that as
+thoroughly as possible. Since the Apache HTTP server runs the PHP
+interpreter, it's relatively easy to match the per-request information
+my honey pot and malware emulation code saved, to a given HTTP request,
+since both have the
+Internet Protocol address that the request came from, the URI that the
+request wants, and a timestamp. The tricky parts involve not
+duplicating matches between honey pot emulation-saved information and
+a single Apache log file line. If an exact match on IP address, URI and
+timestamp (that doesn't also match a previous honey pot request) doesn't exist,
+you have to look for Apache log file entries within a few seconds of the
+honey pot info's timestamp.
+</p>
+<div id="subsubheader"><h3>Emulated Software</h3></div>
+<p>
+I captured HTML from a real WordPress 2.9.2 installation. I wrote small
+amounts of PHP code to display the captured HTML appropriately.  The PHP that
+executed on honey pot page access logged the values in <kbd>$_SERVER</kbd>,
+<kbd>$_REQUEST</kbd>, <kbd>$_COOKIE</kbd>, and kept the files named in
+<kbd>$_FILE</kbd>, along with other info.  Most of the interaction
+with my fake-WordPress blog was with programs - the CSS files
+referenced in the HTML rarely got requested. Any access by a real browser
+would have requested CSS files, or at least <kbd>favicon.ico</kbd>.
+</p>
+<p>
+The ability to appear to install malware was key to tricking
+downloads of much of the malware. In addition to faking WordPress
+theme and plugin downloads and installs, and faking accepting new posts,
+I emulated parts of the
+popular <a href="https://github.com/orbweb/PHP-SHELL-WSO">WSO 2.5.1</a> web shell.
+I installed a WSO shell file on a second machine behind a firewall.
+I captured HTML for the WSO login screen, the main screen and the results of
+a successful file upload. I wrote <a href="pseudo_wso.phps">PHP code</a>
+that served the various 
+chunks of HTML at appropriate times. The PHP code also captured any
+uploaded files, and recorded a lot of the information available to PHP
+at the time of access.
+I believe that generating WSO-like HTML that shows a file got
+downloaded is essential to getting lots of downloads.
+Showing a "main page" without the new file listed on it after a download
+attempt doesn't seem to give
+attackers the cue to try their download, and maybe download something else.
+WSO emulators that show a directory listing with more than just the
+last file it uploaded may draw more invocations of downloaded malware.
+</p>
+<p>
+I also emulated some pieces of malware that came along:
+an <a href="smtp.recon1.phps">STMP tester</a> downloaded via the
+<a href="backdoors.html">7c334.php</a> backdoor,
+and the <a href="emailers.html">qq.php emailer</a>.
+I had to read and understand all code downloaded before
+I could emulate it adequately, so I did not write
+<kbd>qq.php</kbd> emulation in time to catch any spamming attempts.
+I did catch malware with a <kbd>7c334.php</kbd> emulator.
+</p>
+<p>
+
+</p>
+</div>
+</div>
+
+<div id="navigation">
+<div id="subheader"><h2>Sections</h2></div>
+<ul>
+	<li><a href="index.html">Introduction</a>.</li>
+	<li>Honey Pot Details</li>
+	<li><a href="access.html">Obtaining Access</a></li>
+	<li><a href="comment_spam.html">Spam Posts</a></li>
+	<li><a href="wso.html">WSO Web Shell</a></li>
+	<li><a href="login.html">WSO Session Example</a></li>
+	<li><a href="emailers.html">Email Spam Tools</a></li>
+	<li><a href="recon.html">Reconnaissance Tools</a></li>
+	<li><a href="gateway.html">File Retrieval Gateway</a></li>
+	<li><a href="testm.html">Obfuscated Code Champion</a></li>
+	<li><a href="backdoors.html">Back Doors</a></li>
+</ul>
+</div>
+
+<div id="extra">
+<div id="subheader"><h2>Author</h2></div>
+<p>
+<a href="mailto:bediger@stratigery.com">Bruce Ediger</a>, October, 2013.
+</p>
+<div id="subheader"><h2>Database Design</h2></div>
+<p>
+<a href="dbdesign.html">Design of database</a> for Apache and p0f log file records.
+</p>
+<p>
+<a href="database_sql.zip">Table creation SQL</a>.
+<p>
+</p>
+</p>
+<div id="subheader"><h2>Honey Pot Source Samples</h2></div>
+<p>
+<a href="wp_login.phps">Emulated login page</a>.
+</p>
+<p>
+<a href="pseudo_wso.phps">Emulated WSO shell</a>.
+</p>
+</div>
+<div id="footer"><p>Up to Bruce Ediger's <a style="color:white;" href="/">Web pages</a>.</p></div>
+</div>
+</body>
+</html>

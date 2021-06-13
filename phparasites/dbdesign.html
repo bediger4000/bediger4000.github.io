@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML Basic 1.0//EN" "file:///home/bediger/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en-US">
+<head>
+<meta name="google-site-verification" content="ixC4wtdetOlWNosRSwl6CFgRutGwfbq_9r9z534uRkY" />
+title>Design of Database</title>
+<!-- $Id: dbdesign.html,v 1.1 2012/10/28 17:06:08 bediger Exp $ -->
+</head>
+<body>
+<h1>Design of Database</h1>
+<p>Bruce Ediger</p>
+<p><em>2013-04-14</em></p>
+<h2>Database</h2>
+<p>
+</p>
+<h2>Visualization of DB</h2>
+<img src="tables.png" alt="database tables relationships" />
+<p>
+The above diagram
+represents tables by rectangular blocks, has the table name in bold.
+It lists column names in regular type in the blocks.
+Foreign key fields have arrows pointing to the primary keys.
+</p>
+<h2>seq_no</h2>
+<p>
+Any request of the Apache web server ends up putting a line
+in table <kbd>access_log</kbd>. That table has a column <kbd>seq_no</kbd>.
+I made every effort to get a coherent, matching value of <kbd>seq_no</kbd>
+for rows in table <kbd>p0f</kbd> (essentially for a TCP SYN packet) that make 
+a request of TCP port 80.
+</p>
+<pre>
+SELECT seq_no FROM access_log
+WHERE ip_addr = <em>p0f from IP address</em>
+AND request_dt = <em>p0f timestamp</em>
+AND seq_no IS NOT NULL
+AND seq_no NOT IN (
+    SELECT seq_no
+    FROM p0f
+    WHERE from_addr = <em>p0f from IP address</em>
+    AND seq_no IS NOT NULL
+)
+</pre>
+<p>
+When finding a <kbd>seq_no</kbd> value for a <kbd>p0f</kbd> record,
+the above SQL tries to find a <kbd>seq_no</kbd> value from an Apache
+<kbd>access_log</kbd> record that's already in the database, based on
+matching IP address of the source, and timestamp.
+Occasionally, the same IP address can make multiple HTTP requests per
+second, so the "NOT IN" clause keeps the code from assigning the same
+<kbd>seq_no</kbd> to two rows in table <kbd>p0f</kbd>.
+</p>
+<p>
+Sometimes the <kbd>p0f</kbd> record and the <kbd>access_log</kbd> record
+have timestamps that differ.  I ended up using this SQL as a second chance
+to find a value of <kbd>seq_no</kbd>:
+</p>
+<pre>
+SELECT seq_no FROM access_log 
+WHERE ip_addr = <em>p0f from IP address</em>
+AND (request_dt BETWEEN
+   (CAST(<em>p0f timestamp</em> as timestamp with time zone) - INTERVAL '3 second') 
+   AND
+   (CAST(<em>p0f timestamp</em> as timestamp with time zone) + INTERVAL '3 second'))
+AND seq_no not in (
+   SELECT seq_no
+   FROM p0f
+   WHERE to_port = 80
+   AND from_addr = <em>p0f from IP address</em> AND seq_no IS NOT NULL
+)
+</pre>
+<p>
+For the 6-second interval code above to work best, the <kbd>p0f</kbd> records
+should present in chronological order. This maximizes the number of table
+<kbd>p0f</kbd> rows that get a value of <kbd>seq_no</kbd>, and minimizes
+the number of mismatches.
+</p>
+<h2>Rationale</h2>
+<p>
+Batch - revoke a set of inserts.  Each file full of <kbd>p0f</kbd>
+records, or lines from <kbd>access_log</kbd> gets a single value of <kbd>batch_no</kbd>.
+Corresponding rows in table <kbd>access_log</kbd> or <kbd>p0f</kbd> have that
+value of <kbd>batch_no</kbd>.  If a file gets processed incorrectly, I can
+delete all rows of that file based on value of <kbd>batch_no</kbd>.
+</p>
+<p>
+Three "fact tables" exist, tables named <kbd>p0f</kbd>, <kbd>access_log</kbd>, <kbd>scan</kbd>
+Each line in a <kbd>p0f.log</kbd> becomes a row in table <kbd>p0f</kbd>,
+for example.
+</p>
+<p>
+"_d" tables - dimension tables more or less.
+Some shared between fact tables.
+</p>
+<p>
+Four "link tables", doing many-to-many relationships.
+</p>
+<ol>
+	<li>Nmap OS guesses from PHP scan-backs.</li>
+	<li>Keywords from in-the-clear search engine query referrals.</li>
+	<li>Environment variable values from PHP programs</li>
+	<li>Request variable values from PHP programs</li>
+</ol>
+</body>
+</html>

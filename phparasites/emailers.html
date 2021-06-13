@@ -1,0 +1,273 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+<head>
+<title>PHParasites:  WordPress Malware</title>
+<meta name="google-site-verification" content="ixC4wtdetOlWNosRSwl6CFgRutGwfbq_9r9z534uRkY" />
+<meta http-equiv="content-type" content="text/html; charset=utf-8">
+<style type="text/css">
+html,body{margin:0;padding:0}
+body{font: 76% arial,sans-serif}
+p{margin:0 10px 10px}
+div#header h1{height:80px;line-height:80px;margin:0; padding-left:10px;background: #EEE;color: #79B30B}
+div#subheader h2{height:15px;line-height:15px;margin:5px; padding-left:10px;color: #79B30B}
+div#subsubheader h3{height:10px;line-height:10px;margin:5px; padding-left:12px;color: #79B30B}
+div#content p{line-height:1.4}
+div#content pre{line-height:1.4;margin:5px;font:100% courier;}
+div#content kbd{font:100% courier;}
+div#content pre{line-height:1.4;margin:5px;font:100% courier;}
+div#content kbd{font:100% courier;}
+div#navigation{background:#B9CAFF}
+div#extra{background:#FF8539}
+div#footer{background: #333;color: #FFF}
+div#footer p{margin:0;padding:5px 10px}
+div#wrapper{float:left;width:100%}
+div#content{margin: 0 25%}
+div#navigation{float:left;width:25%;margin-left:-100%}
+div#extra{float:left;width:25%;margin-left:-25%}
+div#footer{clear:left;width:100%}
+</style>
+</head>
+<body>
+<div id="container">
+<div id="header">
+	<h1>PHParasites:  WordPress Malware</h1>
+</div>
+<div id="wrapper">
+<div id="content">
+<div id="subheader"><h2>Email Spam Tools</h2></div>
+<p>
+Attackers uploaded PHP source code that seems specifically
+designed to send spam email.
+Upon upload, the spam tools immediately get called
+with what looks like well-known addresses to test them.
+</p>
+<div id="subsubheader"><h3>qq.php</h3></div>
+<p>
+<kbd>qq.php</kbd> arrived as a file uploaded to <a href="wso.html">WSO</a>
+from 188.165.215.67, four different times: 
+ 2013-06-26T10:33:35-06,
+ 2013-06-26T11:36:41-06,
+ 2013-07-02T09:02:19-06,
+ 2013-07-02T10:22:07-06.
+</p>
+<p>
+Invoked 21 diffent times after upload, by 188.165.215.67 and 88.198.1.37,
+4 times on 2013-07-02, 15 times on 2013-09-13T and two times on 2013-09-25.
+The first 4 invocations by 188.165.215.67, the rest by 88.198.1.37.
+</p>
+<p>
+<kbd>p0f</kbd> identifies 188.165.215.67 as "Windows Vista SP0/SP2, 7 SP0+, 2008 SP0".
+<kbd>p0f</kbd> identifies 88.198.1.37 as "Linux 2.6 (newer, 3) or Mac OSX 10.3.1 (possibly FC 6, CentOS 5.x)".
+I don't know what to make of the nearly 2-month gap between uploading
+<kbd>qq.php</kbd>. and 88.198.1.37 invoking it.
+</p>
+<p>
+I had ended my honey pot experiment by September 13, so I don't have any data
+on what got sent to <kbd>qq.php</kbd> by 88.198.1.37. The four attempts at
+invoking <kbd>qq.php</kbd> by 188.165.215.67 were all clearly intended as tests
+of my honey pot host's SMTP system. The four invocations of "qq.php" had two
+each using "stratigery.com" and "www.stratigery.com" as the host name part of
+the URL.  The POST parameters passed to <kbd>qq.php</kbd> involved a parameter
+named "body", with values like this:
+</p>
+<pre>
+&lt;html&gt;&lt;head&gt;&lt;/head&gt;&lt;body&gt;TEST http://www.stratigery.com/wp-content/uploads/2013/06/qq.php&lt;br/&gt;
+&lt;/body&gt;&lt;/html&gt;
+</pre>
+<p>and</p/>
+<pre>
+&lt;html&gt;&lt;head&gt;&lt;/head&gt;&lt;body&gt;TEST http://stratigery.com/wp-content/uploads/2013/06/qq.php&lt;br/&gt;
+&lt;/body&gt;&lt;/html&gt;
+</pre>
+<p>
+That constitutes an SMTP test. It seems to me that
+using gmail.com as an SMTP server and email reader would prevent you from
+seeing some or all of the relevant SMTP headers. Perhaps it isn't
+worth the risk of running your own SMTP server to see them.
+Apparently, "davidberns60@gmail.com" is interested in the contents of
+these emails.
+</p>
+<p>
+The <kbd>qq.php</kbd>. source code is just a wrapper around code from the
+open source <a href="https://github.com/Synchro/PHPMailer">PHPMailer</a> project.
+Values of <kbd>$Version</kbd> in the code indicates PHPMailer version 5.2.2,
+and it has no comments - they've all been stripped from the code.
+</p>
+<div id="subsubheader"><h3>accountTu39</h3></div>
+<p>
+A fairly versatile spamming tool, <kbd>accountTu39.php</kbd> allows the user to
+send batches of SMTP emails to a list of (firstname, lastname, email address)
+tuples, specify a subject and message body, and customize the subject line and
+message body by macro substitution of the victim's first name and last name in
+both.  Extra HTTP parameters allow the user to send base64-encoded HTTP
+parameters to <kbd>accountTu39.php</kbd>, and get debugging output from
+spamming sessions.
+</p>
+<p>
+The original upload has a weird attempts at obfuscation - all functions and
+variables got renamed mechanically, all comments stripped out, all indentations
+and end-of-line characters removed. Seems like a corporate-style obfuscation,
+since it doesn't involve <kbd>eval()</kbd> or <kbd>preg_replace()</kbd>
+executing base64-encoded PHP.
+</p>
+<p>
+This code has self-contained SMTP implementation, complete with multiple 
+fall-back alternatives to create a socket.  It probably runs
+on many PHP versions, and isn't Windows or Linux specific.
+The code also allows the names in HTTP POST request name/value pairs to
+take on arbitraray values: only the first character in a name matters.
+This is probably an attempt to avoid intrusion detection systems when
+invoking a freshly installed <kbd>accountTu39.php</kbd>.
+</p>
+<p>
+This code arrived 2013-06-24T09:51:03-06, via WSO "uploadFile".
+By 2013-07-01T13:35:38-06, the same IP address was uploading an
+evolved version. Because the obfuscation makes development
+almost impossible, it would seem that the attackers have the original,
+unobfuscated code, develop that, and re-obfuscate.
+</p>
+<p>
+The attachers invoked <kbd>accountTu39.php</kbd> 3 times in the next 4
+seconds after upload. These invocations were pretty clearly a test run,
+sending The string "Do you remember me?" to robotsk@stat-run.info. The
+nominal sender of the test email is one "John Smith", infozz@stat-run.info.
+Once again, we note multiple attempts at failure-prone operations.
+</p>
+<div id="subsubheader"><h3>823491.php</h3></div>
+<p>
+Just for variety, someone from 91.213.8.225 uploaded (only a single time, via WSO shell) an interactive
+bulk email web page. The other email spamming tools don't even pretend
+to offer a human-user-interface, but this PHP generates a
+<a href="823491.html">plain, but serviceable, human interface</a>.
+It might be possible to use it programmatically, as people certainly
+use the WSO web shell as a file uploading service.
+I have no record of it any invocation.
+</p>
+<p>
+The upload of <kbd>823491.php</kbd>. seems automatic: 91.213.8.225 made 4 HTTP
+requests in 3 seconds. The sequence went like this:
+</p>
+<ol>
+	<li>GET <kbd>mod_menu.php</kbd>, the WSO web shell file name.</li>
+	<li>POST pass=FDY17c to <kbd>mod_menu.php</kbd>: send it a password. WSO, and my 
+	emulation, set a cookie based on the MD5 hash of the hostname,
+	and the MD5-hashed password.
+	</li>
+	<li>Upload <kbd>823491.php</kbd> file to WSO, using the "uploadFile" action
+		of WSO.  Send the cookie from step 2 along in HTTP headers.  </li>
+	<li>Re-invoke <kbd>mod_menu.php</kbd>, sending the cookie from step 2 along in HTTP headers.
+	</li>
+</ol>
+<p>
+Steps (1) and (2) can actually be circumvented by sending an extra HTTP
+parameter, something like <kbd>pass=45000045</kbd>, in the step (3) call to
+"uploadFile" action. WSO doesn't check if a user retrieves a login page first
+(step (1)) or if the login cookie gets set with an extra parameter while
+requesting an "uploadFile".  Other code does this exact circumvention.
+</p>
+<p>
+The "default action" of WSO web shells is "FilesMan", which ends up displaying
+a listing of WSO's working directory. This is also the directory that the file
+named "823491.php" should appear. Unfortunately, my emulation code would only
+show "823491.php" in the files listing in the HTML returned to 91.213.8.225
+after step 3. The extra invocation of <kbd>mod_menu.php</kbd> in step 4
+wouldn't show "823491.php" in the directory listing. I suspect this caused the
+program at 91.213.8.225 to assume an error or a trap, and just move on. Very
+clever, Mister Bond!
+</p>
+<p>
+</p>
+<div id="subsubheader"><h3><a name="POSTMAN">PostMan Full 3.5-insec</a></h3></div>
+<p>
+This interactive spamming tool has some interest in that it was not installed
+via WSO "uploadFile" action, but rather arrived along with a WSO file, and an
+<a href="recon.html#URLPHP">SMTP recon program</a> in the attacker's favorite
+"Tumblr Importer" plugin.  Attackers invoked the SMTP recon program immediately
+after upload. That got a WSO login page, as I did not emulate the SMTP recon
+program.  PostMan Full 3.5 was never invoked.
+</p>
+<p>
+Googling for "PostMan Full 3.5" yeilds some interesting things.  The copy
+downloaded to my honey pot claims that it's "by Ghostx", and other copies do
+too, but some claim they're by "&lt;&lt;&lt;AZ&gt;&gt;&gt;", or "unknown" or
+"Januardy" or "r3v3ng4ns".
+</p>
+<p>
+That matches up with the internals - the code is clearly hacked on by many.
+The actual SMTP email is done by a very
+early (circa 2003) version of the <a
+href="https://github.com/Synchro/PHPMailer">PHPMailer</a>.  The PHPMailer code is
+clearly supposed to be password-encrypted, but someone along the way has
+changed whatever password encryption previously existed into a simple,
+password-less, character-replacement scheme.  There's a cryptic comment (in
+English and Portugese) at the start of the code about how "YOUR PASSWORD IS
+ONLY YOURS!" and you're not supposed to share it. So much for showing respect
+to fellow spammers or "bulkers" or whatever self-serving euphemism they use
+now.
+</p>
+<p>
+After leaving the <a href="copyright.php.html">HTML for a defanged "PostMan Full 3.5"</a>
+available for a few days, I note that HTML gets hits by referral from Google.
+It appears that people google for some identifiable phrase in the HTML,
+visit the URLs provided, and send spam emails via "PostMan Full v3.5" as
+installed by some other miscreant. It may be worth including an emulated
+"PostMan Full v3.5-insec" PHP program in future honey pots, just to draw
+spammers and see what they send out.
+</p>
+<p>
+Some folks test PostMan Full 3.5, trying to get it to send a test email
+to an address multiple times. Others appear to just use the form indiscriminately.
+</p>
+</div>
+</div>
+
+<div id="navigation">
+<div id="subheader"><h2>Sections</h2></div>
+<ul>
+	<li><a href="index.html">Introduction</a>.</li>
+	<li><a href="details.html">Honey Pot Details</a></li>
+	<li><a href="access.html">Obtaining Access</a></li>
+	<li><a href="comment_spam.html">Spam Posts</a></li>
+	<li><a href="wso.html">WSO Web Shell</a></li>
+	<li><a href="login.html">WSO Session Example</a></li>
+	<li>Email Spam Tools</li>
+	<li><a href="recon.html">Reconnaissance Tools</a></li>
+	<li><a href="gateway.html">File Retrieval Gateway</a></li>
+	<li><a href="testm.html">Obfuscated Code Champion</a></li>
+	<li><a href="backdoors.html">Back Doors</a></li>
+</ul>
+</div>
+
+<div id="extra">
+<div id="subheader"><h2>Author</h2></div>
+<p>
+<a href="mailto:bediger@stratigery.com">Bruce Ediger</a>, October, 2013.
+</p>
+<div id="subheader"><h2>Email Spam Tools PHP code</h2></div>
+<p>
+<a href="qq.phps">qq.php</a>
+</p>
+<p>
+HTML from executing <a href="823491.html">823491.php</a>
+</p>
+<p>
+Original, obfuscated <a href="original.accountTu39.phps">accountTu39.php</a>
+</p>
+<p>
+Reverse engineered <a href="reversed.accountTu39.phps">accountTu39.php</a>
+</p>
+<p>
+<a href="http://pastebin.com/ZPn4TC7J">Someone else's verson</a> of reverse engineered accountTu39.php.
+</p>
+<p>
+<a href="cookieJNFb.txt">Evolved version</a> of accountTu39.php.
+</p>
+<p>
+HTML from executing <a href="copyright.php.html">PostMan Full V3.5</a>. Some JavaScript deleted,
+just to keep it from being used maliciously.
+</p>
+</div>
+<div id="footer"><p>Up to Bruce Ediger's <a style="color:white;" href="/">Web pages</a>.</p></div>
+</div>
+</body>
+</html>

