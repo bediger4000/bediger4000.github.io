@@ -1,0 +1,159 @@
+index.html:614: parser error : Entity 'Delta' not defined
+a ratio of finite quantities,<br/><code><sup>&Delta;V</sup>/<sub>&Delta;t</sub> 
+                                                    ^
+index.html:614: parser error : Entity 'Delta' not defined
+a ratio of finite quantities,<br/><code><sup>&Delta;V</sup>/<sub>&Delta;t</sub> 
+                                                                        ^
+index.html:615: parser error : Entity 'Delta' not defined
+If I use a small enough time step (numerical value of <code>&Delta;t</code>)
+                                                                   ^
+index.html:617: parser error : Entity 'Delta' not defined
+the equation by <code>&Delta;t</code>, and use <code>int()</code> function to
+                             ^
+index.html:619: parser error : Entity 'Delta' not defined
+<code>&Delta;V = int(P(1-V/N)V&Delta;t)</code>
+             ^
+index.html:619: parser error : Entity 'Delta' not defined
+<code>&Delta;V = int(P(1-V/N)V&Delta;t)</code>
+                                     ^
+index.html:622: parser error : Entity 'Delta' not defined
+Euler's method has you calculate a value of <code>&Delta;V</code>
+                                                         ^
+index.html:624: parser error : Entity 'Delta' not defined
+of <code>V</code>, <code>P</code> and <code>&Delta;t</code>.
+                                                   ^
+index.html:625: parser error : Entity 'Delta' not defined
+The algorithm adds <code>&Delta;V</code> to the current value of <code>V</code>
+                                ^
+index.html:629: parser error : Entity 'Delta' not defined
+e>V<sub>i+1</sub> = V<sub>i</sub> + int(P(1-V<sub>i</sub>/N)V<sub>i</sub>&Delta;
+                                                                               ^
+index.html:632: parser error : Entity 'Delta' not defined
+First, rounding down to the next lowest integer value of <code>&Delta;t</code>
+                                                                      ^
+index.html:647: parser error : Entity 'Delta' not defined
+and <code>&Delta;t</code> = 1 which match the NWS simulation.
+                 ^
+index.html:649: parser error : Entity 'Delta' not defined
+so that the value of <code>&Delta;V</code> comes out to 1 during the first time 
+                                  ^
+index.html:653: parser error : Entity 'Delta' not defined
+<code>&Delta;V</code> = 0.
+             ^
+index.html:847: parser error : Entity 'Delta' not defined
+R<sub>i+1</sub> = R<sub>i</sub> + (PI<sub>i</sub>R<sub>i</sub>/N)&Delta;t
+                                                                        ^
+index.html:850: parser error : Entity 'Delta' not defined
+i</sub> + (PI<sub>i</sub>S<sub>i</sub>/N - PI<sub>i</sub>R<sub>i</sub>/N)&Delta;
+                                                                               ^
+index.html:2301: parser error : Entity 'nbsp' not defined
+<li>[1]&nbsp;<a name="B1">The Jargon File</a>
+             ^
+index.html:2307: parser error : Entity 'nbsp' not defined
+<li>[2]&nbsp;<a name="B2">The ELF Virus Writing HOWTO</a>, section 1.1
+             ^
+index.html:2313: parser error : Entity 'nbsp' not defined
+<li>[3]&nbsp;<a name="B3">Email Virus Propagation Modeling and Analysis</a>
+             ^
+index.html:2319: parser error : Entity 'nbsp' not defined
+<li>[4]&nbsp;<a name="B4">The Jargon File</a>
+             ^
+index.html:2325: parser error : Entity 'nbsp' not defined
+<li>[5]&nbsp;<a name="B5">Cheese beats crackers</a>
+             ^
+index.html:2331: parser error : Entity 'nbsp' not defined
+<li>[6]&nbsp;<a name="B6">The Case for Beneficial Computer Viruses and Worms</a>
+             ^
+index.html:2340: parser error : Entity 'nbsp' not defined
+<li>[7]&nbsp;<a name="B7">Whitehat 'Max Vision' gets 18 months</a>
+             ^
+index.html:2348: parser error : Entity 'nbsp' not defined
+<li>[8]&nbsp;<a name="B8">Slashdot, News for Nerds. Stuff that matters.</a>
+             ^
+index.html:2353: parser error : Entity 'nbsp' not defined
+<li>[9]&nbsp;<a name="B9">Netcraft: Web Server Survey Archives</a>
+             ^
+index.html:2359: parser error : Entity 'nbsp' not defined
+<li>[10]&nbsp;<a name="B10">How to 0wn the Internet in Your Spare Time</a>
+              ^
+index.html:2368: parser error : Entity 'nbsp' not defined
+<li>[11]&nbsp;<a name="B11">Internet Quarantine: Requirements for Containing Sel
+              ^
+index.html:2376: parser error : Entity 'nbsp' not defined
+<li>[12]&nbsp;<a name="B12">Code Red Worm Propagation Modeling and Analysis</a>
+              ^
+index.html:2384: parser error : Entity 'nbsp' not defined
+<li>[13]&nbsp;<a name="B13">SSF.App.Worm A Network Worm Modeling Package for SSF
+              ^
+index.html:2390: parser error : Entity 'nbsp' not defined
+<li>[14]&nbsp;<a name="B14">Scalable Simulation Framework</a>
+              ^
+index.html:2395: parser error : Entity 'nbsp' not defined
+<li>[15]&nbsp;<a name="B15">Directed-Graph Epidemiological Models of Computer Vi
+              ^
+index.html:2403: parser error : Entity 'nbsp' not defined
+<li>[16]&nbsp;<a name="B16">GNU GENERAL PUBLIC LICENSE, version 2</a>
+              ^
+index.html:2409: parser error : Entity 'nbsp' not defined
+<li>[17]&nbsp;<a name="B17">Shining Light on Dark Address Space</a>
+              ^
+index.html:2416: parser error : Entity 'nbsp' not defined
+<li>[18]&nbsp;<a name="B18">Tcl Developer Site</a>
+              ^
+index.html:2421: parser error : Entity 'nbsp' not defined
+<li>[19]&nbsp;<a name="B19">Lua: an Extensible Embedded Language</a>
+              ^
+index.html:2428: parser error : Entity 'nbsp' not defined
+<li>[20]&nbsp;<a name="B20">S-Lang Library Information Page</a>
+              ^
+index.html:2433: parser error : Entity 'nbsp' not defined
+<li>[21]&nbsp;<a name="B21">The Network Simulator - ns-2</a>
+              ^
+index.html:2438: parser error : Entity 'nbsp' not defined
+<li>[22]&nbsp;<a name="B22">Models: Why?</a>
+              ^
+index.html:2445: parser error : Entity 'nbsp' not defined
+<li>[23]&nbsp;<a name="B23">Christmas 1988 Decnet Worm -- Counteracted</a>
+              ^
+index.html:2453: parser error : Entity 'nbsp' not defined
+<li>[24]&nbsp;<a name="B24">A Brief Analysis of the ADM Internet Worm</a>
+              ^
+index.html:2460: parser error : Entity 'nbsp' not defined
+<li>[25]&nbsp;<a name="B25">CAIDA Analysis of Code-Red</a>
+              ^
+index.html:2465: parser error : Entity 'nbsp' not defined
+<li>[26]&nbsp;<a name="B26">OpenSSL Vulnerabilities</a>
+              ^
+index.html:2472: parser error : Entity 'nbsp' not defined
+<li>[27]&nbsp;<a name="B27">Global Slapper Worm Information Center</a>
+              ^
+index.html:2478: parser error : Entity 'nbsp' not defined
+<li>[28]&nbsp;<a name="B28">The Logistic Equation and Integration by Partial Fra
+              ^
+index.html:2484: parser error : Entity 'nbsp' not defined
+<li>[29]&nbsp;<a name="B29">Euler's Method</a>
+              ^
+index.html:2490: parser error : Entity 'nbsp' not defined
+<li>[30]&nbsp;<a name="B30">The SIR Model for Spread of Disease</a>
+              ^
+index.html:2496: parser error : Entity 'nbsp' not defined
+<li>[31]&nbsp;<a name="B31">Re: CodeGreen beta release (idq-patcher/antiCodeRed/
+              ^
+index.html:2505: parser error : Entity 'nbsp' not defined
+<li>[32]&nbsp;<a name="B32">Scalper and Slapper Worms Genealogy</a>
+              ^
+index.html:2512: parser error : Entity 'nbsp' not defined
+<li>[33]&nbsp;<a name="B33">Lion Internet Worm Analysis</a>
+              ^
+index.html:2520: parser error : Entity 'nbsp' not defined
+<li>[34]&nbsp;<a name="B34">Incident Note IN-2001-05 - The "cheese" worm</a>
+              ^
+index.html:2528: parser error : Entity 'nbsp' not defined
+<li>[35]&nbsp;<a name="B35">Advisory CA-2003-20 W32/Blaster worm</a>
+              ^
+index.html:2536: parser error : Entity 'nbsp' not defined
+<li>[36]&nbsp;<a name="B36">Recode from disassembly of the Win32 DCOM worm </a>
+              ^
+index.html:2545: parser error : Entity 'nbsp' not defined
+<li>[37]&nbsp;<a name="B37"> IP v4 Address Space Utilization</a>
+              ^
